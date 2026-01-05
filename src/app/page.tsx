@@ -5,7 +5,6 @@ import { SearchSection } from '@/components/SearchSection'
 import { CompaniesModalClient } from '@/components/CompaniesModalClient'
 import { CompaniesChart } from '@/components/CompaniesChart'
 import { EducationChart } from '@/components/EducationChart'
-import { GeographyChart } from '@/components/GeographyChart'
 import { InterestsOccupationsSection } from '@/components/InterestsOccupationsSection'
 import Link from 'next/link'
 
@@ -138,9 +137,21 @@ export default async function HomePage() {
                   <EducationChart education={stats.education} />
                 </StatCard>
 
-                {/* Geographic Distribution */}
-                <StatCard title="Geographic Distribution">
-                  <GeographyChart geography={stats.geography} />
+                {/* Top Interests Distribution */}
+                <StatCard title="Top Interests">
+                  <div className="h-96">
+                    <BarChart
+                      data={stats.interests.slice(0, 10).map(item => ({
+                        name: item.canonical_name.length > 20 ? item.canonical_name.substring(0, 20) + '...' : item.canonical_name,
+                        value: item.count,
+                        percentage: item.percentage,
+                        fullName: item.canonical_name,
+                      }))}
+                      dataKey="value"
+                      color="hsl(var(--info))"
+                      height={384}
+                    />
+                  </div>
                 </StatCard>
 
                 {/* Occupation Distribution with clickable list below */}
