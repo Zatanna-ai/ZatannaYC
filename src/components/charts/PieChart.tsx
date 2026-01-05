@@ -3,7 +3,7 @@
 import { PieChart as RechartsPieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts'
 
 interface PieChartProps {
-  data: Array<{ name: string; value: number; fullName?: string }>
+  data: Array<{ name: string; value: number; fullName?: string; percentage?: number }>
   height?: number
   colors?: string[]
   onSliceClick?: (data: { name: string; value: number; fullName?: string }) => void
@@ -69,6 +69,12 @@ const renderLegend = (props: any) => {
 // Custom tooltip with click hint
 const CustomTooltip = ({ active, payload, showClickHint }: any) => {
   if (active && payload && payload.length) {
+    const data = payload[0].payload
+    // Use the original percentage if available, otherwise use Recharts calculated percentage
+    const percentage = data.percentage !== undefined 
+      ? data.percentage 
+      : (payload[0].payload.percent * 100) // Recharts calculated percentage
+    
     return (
       <div
         className="bg-card border border-border rounded-lg shadow-lg p-3"
@@ -77,9 +83,9 @@ const CustomTooltip = ({ active, payload, showClickHint }: any) => {
           border: '1px solid hsl(var(--border))',
         }}
       >
-        <p className="text-sm font-medium">{payload[0].name}</p>
+        <p className="text-sm font-medium">{data.fullName || payload[0].name}</p>
         <p className="text-sm text-muted-foreground">
-          {payload[0].value.toFixed(1)}%
+          {percentage.toFixed(1)}%
         </p>
         {showClickHint && (
           <p className="text-xs text-info mt-2 italic">

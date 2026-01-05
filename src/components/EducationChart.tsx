@@ -18,9 +18,11 @@ export function EducationChart({ education }: EducationChartProps) {
   const [selectedSchool, setSelectedSchool] = useState<string | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
 
+  // Use count for pie chart sizing, but store percentage for tooltip
   const educationPieData = education.slice(0, 8).map(item => ({
     name: item.university.length > 30 ? item.university.substring(0, 30) + '...' : item.university,
-    value: item.percentage,
+    value: item.count, // Use count for pie chart sizing (Recharts will calculate percentages)
+    percentage: item.percentage, // Store original percentage for tooltip display
     fullName: item.university,
   }))
 
