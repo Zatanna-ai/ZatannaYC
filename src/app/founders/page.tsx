@@ -45,9 +45,9 @@ export default async function FoundersPage() {
       <header className="border-b border-border">
         <div className="container mx-auto py-6">
           <nav className="flex items-center justify-between">
-            <Link href="/" className="text-section font-serif hover:text-moss-green transition-colors">
+            <a href="https://zatanna.ai" target="_blank" rel="noopener noreferrer" className="text-section font-serif hover:text-moss-green transition-colors">
               Zatanna
-            </Link>
+            </a>
             <div className="flex gap-4">
               <Link href="/" className="btn-outline">
                 Home
