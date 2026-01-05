@@ -267,6 +267,7 @@ export function generateMockStats(): BatchStats {
     total_founders: total,
     education,
     interests,
+    companies: [],
     geography,
     occupations,
     other_stats: {

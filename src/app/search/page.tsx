@@ -126,10 +126,18 @@ export default function SearchPage() {
       mockResults.push({
         person_id: '1',
         name: 'Alex Chen',
+        linkedin_url: null,
         profile_picture_url: 'https://i.pravatar.cc/150?img=1',
         matched_occupation: 'CTO',
+        occupation_score: 0.85,
+        criteria_score: 0.85,
         combined_score: 0.85,
-        matching_entities: ['sushi', 'food'],
+        matching_entities: [
+          { entity_type: 'interest', entity_value: 'sushi', similarity: 0.9 },
+          { entity_type: 'interest', entity_value: 'food', similarity: 0.8 }
+        ],
+        subject_datapoints: [],
+        criteria_datapoints: [],
       })
     }
 
@@ -137,10 +145,18 @@ export default function SearchPage() {
       mockResults.push({
         person_id: '2',
         name: 'Sarah Johnson',
+        linkedin_url: null,
         profile_picture_url: 'https://i.pravatar.cc/150?img=5',
         matched_occupation: 'CEO',
+        occupation_score: 0.90,
+        criteria_score: 0.90,
         combined_score: 0.90,
-        matching_entities: ['consumer hardware', 'hardware'],
+        matching_entities: [
+          { entity_type: 'interest', entity_value: 'consumer hardware', similarity: 0.95 },
+          { entity_type: 'interest', entity_value: 'hardware', similarity: 0.85 }
+        ],
+        subject_datapoints: [],
+        criteria_datapoints: [],
       })
     }
 
@@ -148,10 +164,18 @@ export default function SearchPage() {
       mockResults.push({
         person_id: '1',
         name: 'Alex Chen',
+        linkedin_url: null,
         profile_picture_url: 'https://i.pravatar.cc/150?img=1',
         matched_occupation: 'CTO',
+        occupation_score: 0.88,
+        criteria_score: 0.88,
         combined_score: 0.88,
-        matching_entities: ['Stanford University', 'CTO'],
+        matching_entities: [
+          { entity_type: 'university', entity_value: 'Stanford University', similarity: 0.92 },
+          { entity_type: 'occupation', entity_value: 'CTO', similarity: 0.85 }
+        ],
+        subject_datapoints: [],
+        criteria_datapoints: [],
       })
     }
 
@@ -159,10 +183,17 @@ export default function SearchPage() {
       mockResults.push({
         person_id: '1',
         name: 'Alex Chen',
+        linkedin_url: null,
         profile_picture_url: 'https://i.pravatar.cc/150?img=1',
         matched_occupation: 'CTO',
+        occupation_score: 0.92,
+        criteria_score: 0.92,
         combined_score: 0.92,
-        matching_entities: ['robotics'],
+        matching_entities: [
+          { entity_type: 'interest', entity_value: 'robotics', similarity: 0.95 }
+        ],
+        subject_datapoints: [],
+        criteria_datapoints: [],
       })
     }
 
@@ -172,10 +203,17 @@ export default function SearchPage() {
         mockResults.push({
           person_id: `${i}`,
           name: `Founder ${i}`,
+          linkedin_url: null,
           profile_picture_url: `https://i.pravatar.cc/150?img=${i + 10}`,
           matched_occupation: 'CEO',
+          occupation_score: 0.75 + Math.random() * 0.2,
+          criteria_score: 0.75 + Math.random() * 0.2,
           combined_score: 0.75 + Math.random() * 0.2,
-          matching_entities: [searchQuery],
+          matching_entities: [
+            { entity_type: 'general', entity_value: searchQuery, similarity: 0.7 }
+          ],
+          subject_datapoints: [],
+          criteria_datapoints: [],
         })
       }
     }
