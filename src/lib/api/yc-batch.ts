@@ -7,8 +7,8 @@
  * - /api/v1/yc-founders/:id - Individual founder details
  */
 
-// Default to localhost:3000 for local development
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'
+// Default to staging API for production, localhost for development
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || (process.env.NODE_ENV === 'production' ? 'https://sgapi.zatanna.ai' : 'http://localhost:3000')
 const API_KEY = process.env.NEXT_PUBLIC_API_KEY || ''
 
 export interface Founder {
@@ -380,6 +380,8 @@ export async function getBatchStats(): Promise<BatchStats> {
   } catch (error) {
     console.error('[YC Batch API] Error fetching dashboard stats:', error)
     console.error('[YC Batch API] API_BASE_URL:', API_BASE_URL)
+    console.error('[YC Batch API] NEXT_PUBLIC_API_URL env:', process.env.NEXT_PUBLIC_API_URL || 'NOT SET')
+    console.error('[YC Batch API] NODE_ENV:', process.env.NODE_ENV)
     console.error('[YC Batch API] Full error details:', {
       message: error instanceof Error ? error.message : String(error),
       stack: error instanceof Error ? error.stack : undefined,

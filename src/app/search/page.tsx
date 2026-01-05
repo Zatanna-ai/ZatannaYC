@@ -56,8 +56,8 @@ function SearchPageContent() {
     setHasSearched(true)
 
     try {
-      // Default to localhost:3000 if not configured
-      const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'
+      // Default to staging API for production, localhost for development
+      const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || (process.env.NODE_ENV === 'production' ? 'https://sgapi.zatanna.ai' : 'http://localhost:3000')
       const API_KEY = process.env.NEXT_PUBLIC_API_KEY || ''
 
       const response = await fetch(`${API_BASE_URL}/api/v1/discover-yc`, {
