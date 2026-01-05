@@ -6,6 +6,7 @@ import { CompaniesModalClient } from '@/components/CompaniesModalClient'
 import { CompaniesChart } from '@/components/CompaniesChart'
 import { EducationChart } from '@/components/EducationChart'
 import { GeographyChart } from '@/components/GeographyChart'
+import { InterestsOccupationsSection } from '@/components/InterestsOccupationsSection'
 import Link from 'next/link'
 
 export default async function HomePage() {
@@ -164,7 +165,7 @@ export default async function HomePage() {
                   <GeographyChart geography={stats.geography} />
                 </StatCard>
 
-                {/* Occupation Distribution */}
+                {/* Occupation Distribution with clickable list below */}
                 <StatCard title="Top Occupations & Roles">
                   <div className="h-96">
                     <BarChart
@@ -173,14 +174,6 @@ export default async function HomePage() {
                       color="hsl(var(--moss-green-400))"
                       height={384}
                     />
-                  </div>
-                  <div className="mt-6 space-y-2.5">
-                    {stats.occupations.slice(0, 5).map((item, idx) => (
-                      <div key={idx} className="flex justify-between text-body items-center py-1.5 px-2 rounded">
-                        <span className="text-muted-foreground truncate mr-2">{item.title}</span>
-                        <span className="font-semibold text-moss-green-400 whitespace-nowrap">{item.percentage}%</span>
-                      </div>
-                    ))}
                   </div>
                 </StatCard>
 
@@ -201,18 +194,11 @@ export default async function HomePage() {
             <div className="space-y-4">
               {/* Top row: Interests list and Average Interests side by side */}
               <div className="grid grid-cols-2 gap-4">
-                {/* Top Interests List */}
-                <div>
-                  <h4 className="text-ui font-serif text-muted-foreground mb-2">Top Interests</h4>
-                  <div className="space-y-1.5">
-                    {stats.interests.slice(0, 8).map((item, idx) => (
-                      <div key={idx} className="flex justify-between text-body items-center py-1 px-2 rounded hover:bg-gray-cream-100 transition-colors">
-                        <span className="text-muted-foreground truncate mr-2 text-sm">{item.canonical_name}</span>
-                        <span className="font-semibold text-info whitespace-nowrap text-sm">{item.percentage}%</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                {/* Top Interests List - Now Clickable */}
+                <InterestsOccupationsSection
+                  interests={stats.interests}
+                  occupations={stats.occupations}
+                />
 
                 {/* Additional Insights */}
                 <div className="space-y-4">
