@@ -20,8 +20,8 @@ export function CompaniesChart({ companies }: CompaniesChartProps) {
 
   const companiesChartData = companies.slice(0, 10).map(item => ({
     name: item.name.length > 20 ? item.name.substring(0, 20) + '...' : item.name,
-    value: item.count, // Use count for bar chart sizing
-    percentage: item.percentage, // Store original percentage for tooltip display
+    value: item.percentage,
+    percentage: item.percentage,
     fullName: item.name,
   }))
 

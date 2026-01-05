@@ -54,8 +54,8 @@ export default async function HomePage() {
   // Prepare chart data
   const occupationChartData = stats.occupations.slice(0, 10).map(item => ({
     name: item.title.length > 20 ? item.title.substring(0, 20) + '...' : item.title,
-    value: item.count, // Use count for bar chart sizing
-    percentage: item.percentage, // Store original percentage for tooltip display
+    value: item.percentage,
+    percentage: item.percentage,
     fullName: item.title,
   }))
 
