@@ -40,7 +40,8 @@ const CustomTooltip = ({ active, payload, showClickHint }: any) => {
 
   const data = payload[0].payload
   const fullName = data.fullName || data.name
-  const value = payload[0].value
+  // Use stored percentage if available, otherwise use the raw value
+  const percentage = data.percentage !== undefined ? data.percentage : payload[0].value
 
   return (
     <div
@@ -49,7 +50,7 @@ const CustomTooltip = ({ active, payload, showClickHint }: any) => {
     >
       <p className="text-sm font-medium text-foreground mb-1">{fullName}</p>
       <p className="text-sm text-muted-foreground mb-1">
-        {value.toFixed(1)}%
+        {percentage.toFixed(1)}%
       </p>
       {showClickHint && (
         <p className="text-xs text-info mt-2 italic">
