@@ -36,23 +36,30 @@ export function EducationFoundersModal({ isOpen, onClose, schoolName }: Educatio
     setLoading(true)
     setError(null)
     try {
-      const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'
+      const API_BASE_URL = 'https://sgapi.zatanna.ai'
       const encodedSchoolName = encodeURIComponent(schoolName)
-      const response = await fetch(`${API_BASE_URL}/api/v1/yc-dashboard/schools/${encodedSchoolName}/founders`)
+      const url = `${API_BASE_URL}/api/v1/yc-dashboard/schools/${encodedSchoolName}/founders`
+      
+      console.log('[EducationFoundersModal] Fetching from:', url)
+      const response = await fetch(url)
 
       if (!response.ok) {
-        throw new Error('Failed to fetch founders')
+        const errorText = await response.text()
+        console.error('[EducationFoundersModal] API error:', response.status, errorText)
+        throw new Error(`Failed to fetch founders: ${response.status} ${response.statusText}`)
       }
 
       const data = await response.json()
+      console.log('[EducationFoundersModal] Response:', data)
       if (data.success) {
         setFounders(data.data.founders || [])
       } else {
         throw new Error(data.error || 'Failed to fetch founders')
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load founders')
-      console.error('Error fetching founders:', err)
+      const errorMessage = err instanceof Error ? err.message : 'Failed to load founders'
+      setError(errorMessage)
+      console.error('[EducationFoundersModal] Error fetching founders:', err)
     } finally {
       setLoading(false)
     }

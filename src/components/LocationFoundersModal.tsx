@@ -36,7 +36,7 @@ export function LocationFoundersModal({ isOpen, onClose, locationName }: Locatio
     setLoading(true)
     setError(null)
     try {
-      const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'
+      const API_BASE_URL = 'https://sgapi.zatanna.ai'
       const encodedLocationName = encodeURIComponent(locationName)
       const response = await fetch(`${API_BASE_URL}/api/v1/yc-dashboard/locations/${encodedLocationName}/founders`)
       
