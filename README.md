@@ -36,7 +36,7 @@ pnpm install
 2. (Optional) Set up environment variables:
 If you want to connect to a backend API, create a `.env.local` file:
 ```env
-NEXT_PUBLIC_API_URL=https://api.zatanna.ai
+NEXT_PUBLIC_API_URL=https://sgapi.zatanna.ai
 NEXT_PUBLIC_API_KEY=your-api-key-here
 ```
 

@@ -2,7 +2,7 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    domains: ['api.zatanna.ai', 'localhost'],
+    domains: ['sgapi.zatanna.ai', 'api.zatanna.ai', 'localhost'],
     remotePatterns: [
       {
         protocol: 'https',
