@@ -5,7 +5,7 @@ import { SearchSection } from '@/components/SearchSection'
 import { CompaniesModalClient } from '@/components/CompaniesModalClient'
 import { CompaniesChart } from '@/components/CompaniesChart'
 import { EducationChart } from '@/components/EducationChart'
-import { InterestsOccupationsSection } from '@/components/InterestsOccupationsSection'
+import { InterestsListWithModal } from '@/components/InterestsListWithModal'
 import Link from 'next/link'
 
 export default async function HomePage() {
@@ -137,24 +137,9 @@ export default async function HomePage() {
                   <EducationChart education={stats.education} />
                 </StatCard>
 
-                {/* Top Interests Distribution */}
+                {/* Top Interests - Clickable List */}
                 <StatCard title="Top Interests">
-                  <div className="h-96">
-                    <BarChart
-                      data={stats.interests
-                        .filter(item => item.canonical_name.toLowerCase() !== 'other')
-                        .slice(0, 10)
-                        .map(item => ({
-                          name: item.canonical_name.length > 20 ? item.canonical_name.substring(0, 20) + '...' : item.canonical_name,
-                          value: item.percentage,
-                          percentage: item.percentage,
-                          fullName: item.canonical_name,
-                        }))}
-                      dataKey="value"
-                      color="hsl(var(--info))"
-                      height={384}
-                    />
-                  </div>
+                  <InterestsListWithModal interests={stats.interests} />
                 </StatCard>
 
                 {/* Occupation Distribution with clickable list below */}
@@ -175,79 +160,6 @@ export default async function HomePage() {
                 </StatCard>
               </div>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Top Interests & Additional Insights Section */}
-      <section className="content-section py-12 border-t border-border">
-        <div className="container mx-auto">
-          <StatCard title="Top Interests & Additional Insights">
-            <div className="space-y-4">
-              {/* Top row: Interests list and Average Interests side by side */}
-              <div className="grid grid-cols-2 gap-4">
-                {/* Top Interests List - Now Clickable */}
-                <InterestsOccupationsSection
-                  interests={stats.interests}
-                  occupations={stats.occupations}
-                />
-
-                {/* Additional Insights */}
-                <div className="space-y-4">
-                  {/* Average Interests */}
-                  <div className="bg-moss-green/5 rounded-lg p-3 border border-moss-green/20">
-                    <h4 className="text-sm font-serif text-moss-green-600 mb-0.5">Average Interests</h4>
-                    <p className="text-2xl font-serif font-bold text-moss-green">{stats.other_stats.avg_interests_per_founder}</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">per founder</p>
-                  </div>
-
-                  {/* Top Platforms */}
-                  <div>
-                    <h4 className="text-ui font-serif text-muted-foreground mb-2">Top Platforms</h4>
-                    <div className="space-y-1.5">
-                      {stats.other_stats.platform_distribution.slice(0, 5).map((item, idx) => (
-                        <div key={idx} className="flex justify-between text-body items-center py-1 px-2 rounded hover:bg-gray-cream-100 transition-colors">
-                          <span className="text-muted-foreground truncate mr-2 text-sm">{item.platform}</span>
-                          <span className="font-semibold whitespace-nowrap text-sm">{item.percentage}%</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </StatCard>
-        </div>
-      </section>
-
-      {/* Interest Intensity Breakdown */}
-      <section className="section-legal content-section py-12">
-        <div className="container mx-auto">
-          <h2 className="text-section font-serif mb-8">Interest Intensity Levels</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {stats.interests.slice(0, 8).map((interest, idx) => (
-              <div key={idx} className="archival-card p-4">
-                <h4 className="text-ui font-serif mb-2">{interest.canonical_name}</h4>
-                <div className="space-y-1 text-caption">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Casual:</span>
-                    <span>{interest.intensity_breakdown.casual}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Enthusiast:</span>
-                    <span>{interest.intensity_breakdown.enthusiast}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Serious:</span>
-                    <span>{interest.intensity_breakdown.serious}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Professional:</span>
-                    <span>{interest.intensity_breakdown.professional}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
           </div>
         </div>
       </section>
