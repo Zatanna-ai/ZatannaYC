@@ -53,34 +53,11 @@ export default async function HomePage() {
   }
 
   // Prepare chart data
-  const topInterests = stats.interests.slice(0, 10).map(item => ({
-    name: item.canonical_name.length > 20 ? item.canonical_name.substring(0, 20) + '...' : item.canonical_name,
-    value: item.percentage,
-    fullName: item.canonical_name,
-  }))
-
-
   const occupationChartData = stats.occupations.slice(0, 10).map(item => ({
     name: item.title.length > 20 ? item.title.substring(0, 20) + '...' : item.title,
     value: item.count, // Use count for bar chart sizing
     percentage: item.percentage, // Store original percentage for tooltip display
     fullName: item.title,
-  }))
-
-  const educationPieData = stats.education.slice(0, 8).map(item => ({
-    name: item.university,
-    value: item.percentage,
-  }))
-
-  const companiesChartData = stats.companies.slice(0, 10).map(item => ({
-    name: item.name.length > 20 ? item.name.substring(0, 20) + '...' : item.name,
-    value: item.percentage,
-    fullName: item.name,
-  }))
-
-  const companiesPieData = stats.companies.slice(0, 8).map(item => ({
-    name: item.name,
-    value: item.percentage,
   }))
 
   return (
@@ -112,7 +89,7 @@ export default async function HomePage() {
             <h1 className="text-hero font-serif mb-3">YC Batch W26 Insights</h1>
             <p className="text-body text-muted-foreground mb-4 max-w-3xl">
               All of these {stats.total_founders} people were researched in <span className="font-semibold text-moss-green">5 minutes</span>.
-              For in-depth data for all of YC, or sales related use cases involving anyone on the planet, {' '}
+              For in-depth data for all of YC, or sales / demographic related use cases involving anyone on the planet, {' '}
               <a href="mailto:rithvik@zatanna.ai" className="text-moss-green hover:underline font-medium">
                 email us at rithvik@zatanna.ai
               </a>
