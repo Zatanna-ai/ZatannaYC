@@ -1,0 +1,81 @@
+# Backend API Integration for YC Batch Report Frontend
+
+I need to wire up my Next.js frontend (running on localhost:4000) to your backend API (running on localhost:3000). Here are the exact requirements:
+
+## Base Configuration
+- Backend URL: http://localhost:3000
+- API Version: /api/v1
+- CORS: Must allow requests from http://localhost:4000
+
+## Required Endpoints
+
+### 1. GET /api/v1/yc-batch/stats
+Returns aggregated batch statistics. Response should include:
+- total_founders: number
+- education: array of {university, count, percentage}
+- interests: array of {activity, canonical_name, count, percentage, intensity_breakdown}
+- geography: array of {location, count, percentage, type}
+- occupations: array of {title, canonical_name, count, percentage, industry, role_level}
+- other_stats: {avg_interests_per_founder, most_common_combinations, platform_distribution}
+
+### 2. GET /api/v1/yc-batch/founders
+Returns array of all founders. Each founder should have:
+- person_id (UUID)
+- name
+- linkedin_url? (optional)
+- profile_picture_url? (optional)
+- interests: array of {activity, canonical_name, intensity: 'casual'|'enthusiast'|'serious'|'professional', confidence, sources}
+- occupations: array of {title, canonical_name, employer, employment_type, role_level, industry, functional_area, status, confidence}
+- universities: string[]
+- high_schools: string[]
+- locations: string[]
+- companies: string[]
+- datapoints: array of {url, title?, snippet?, datapoint_id, platform?}
+- research_summary? (optional)
+
+Response can be either:
+- Direct array: Founder[]
+- Or wrapped: {founders: Founder[]}
+
+### 3. GET /api/v1/yc-batch/founders/:personId
+Returns single founder with same structure as above. Return 404 if not found.
+
+### 4. POST /api/v1/discover-yc
+Semantic search endpoint. Requires Bearer token auth.
+
+Request body:
+{
+  query: string (e.g., "CTOs who went to Michigan")
+  num_results?: number (default 20)
+  organization_id?: string
+}
+
+Response:
+{
+  success: boolean
+  data: {
+    query: string
+    parsed_query?: {...}
+    founders_found: number
+    top_founders: Array<{
+      person_id, name, profile_picture_url?,
+      matched_occupation?, occupation_score?, criteria_score?, combined_score?,
+      matching_entities?, subject_datapoints?, criteria_datapoints?
+    }>
+    elapsed_time_ms?: number
+  }
+}
+
+## CORS Setup
+Must allow:
+- Origin: http://localhost:4000
+- Methods: GET, POST, OPTIONS
+- Headers: Content-Type, Authorization
+
+## Notes
+- All responses should be JSON with Content-Type: application/json
+- Frontend has fallback to mock data if API unavailable, so can implement incrementally
+- Use standard HTTP status codes (200, 404, 401, 500)
+
+Please implement these endpoints and let me know when ready. I'll test by setting NEXT_PUBLIC_API_URL=http://localhost:3000 in the frontend.
+

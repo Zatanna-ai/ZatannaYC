@@ -1,0 +1,60 @@
+# Update Frontend to Match Backend Discover-YC Endpoint
+
+I need to update the frontend search functionality to match my existing backend endpoint structure. Here's what I need from you:
+
+## Current Frontend Implementation
+The frontend is currently making this request:
+- **Endpoint**: `POST /api/v1/discover-yc`
+- **Headers**: `Content-Type: application/json`, `Authorization: Bearer {API_KEY}`
+- **Request Body**:
+```json
+{
+  "query": "string",
+  "num_results": 20
+}
+```
+
+The frontend is currently expecting this response structure:
+```typescript
+{
+  data: {
+    top_founders: Array<{
+      person_id: string
+      name: string
+      profile_picture_url?: string
+      matched_occupation?: string
+      occupation_score?: number
+      criteria_score?: number
+      combined_score?: number
+      matching_entities?: string[]
+    }>
+  }
+}
+```
+
+## What I Need
+Please provide the ACTUAL structure of your backend endpoint:
+
+1. **What is the exact endpoint path?** (is it `/api/v1/discover-yc` or something else?)
+
+2. **What request body fields does it expect?**
+   - Required fields?
+   - Optional fields?
+   - Any field name differences?
+
+3. **What is the actual response structure?**
+   - Is it wrapped in `{ data: {...} }` or is it flat?
+   - What is the array of founders called? (`top_founders`, `results`, `founders`, etc.?)
+   - What fields does each founder object have?
+   - Are there any other fields in the response?
+
+4. **What does a real response look like?** (paste an example)
+
+5. **Authentication**: 
+   - Is Bearer token required?
+   - What header format? (`Authorization: Bearer {token}`?)
+
+6. **Error responses**: What format do errors use?
+
+Once you provide this info, I'll update the frontend code to match exactly.
+

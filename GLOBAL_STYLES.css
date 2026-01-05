@@ -1,0 +1,544 @@
+/**
+ * Zatanna Design System - Global Styles
+ * 
+ * This file contains all global styles, CSS variables, and utility classes
+ * that match the Zatanna product UI. Use this as the base for the YC Batch Report website.
+ * 
+ * Usage:
+ * 1. Import this file in your main CSS file or layout
+ * 2. Ensure Tailwind CSS is configured with the same variables
+ * 3. Use the utility classes throughout your components
+ */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================================
+   CSS VARIABLES - Color System
+   ============================================================================ */
+
+:root {
+  /* Zatanna Brand Colors - from Figma Design System */
+  --moss-green: 60 16% 48%;           /* #8E8E67 - Primary brand color */
+  --moss-green-50: 60 16% 98%;        /* Lightest tint */
+  --moss-green-100: 60 16% 95%;       /* Very light */
+  --moss-green-200: 60 16% 86%;       /* Light */
+  --moss-green-300: 60 16% 74%;       /* Medium-light */
+  --moss-green-400: 60 16% 62%;       /* Medium */
+  --moss-green-500: 60 16% 48%;       /* Base color */
+  --moss-green-900: 60 16% 19%;       /* Dark */
+
+  /* Gray-Cream variants (from Figma variables) */
+  --gray-cream-25: 60 17% 98%;        /* #FBFBF8 */
+  --gray-cream-50: 60 17% 97%;        /* #F7F7F2 */
+  --gray-cream-100: 60 17% 95%;       /* #F3F3EC */
+  --gray-cream-200: 60 17% 91%;       /* #E7E7DA */
+  --gray-cream-300: 60 17% 82%;       /* #D2D2BC */
+  --gray-cream-400: 60 17% 69%;       /* #BCBC9F */
+  --gray-cream-500: 60 16% 48%;       /* #8E8E67 */
+  --gray-cream-900: 60 16% 20%;       /* #37372F */
+
+  /* Core brand colors */
+  --white: 0 0% 100%;                 /* #FFFFFF */
+  --black: 0 0% 0%;                   /* #000000 */
+
+  /* Text colors */
+  --text-primary: 0 0% 4%;            /* #0A0A0A */
+  --text-secondary: 0 0% 32%;         /* #525252 */
+
+  /* shadcn/ui compatibility - mapped to brand colors */
+  --background: 60 17% 98%;           /* gray-cream-25 */
+  --foreground: 0 0% 4%;              /* text-primary */
+  --card: 0 0% 100%;                  /* white */
+  --card-foreground: 0 0% 4%;         /* text-primary */
+  --popover: 0 0% 100%;               /* white */
+  --popover-foreground: 0 0% 4%;      /* text-primary */
+  --primary: 60 16% 48%;              /* moss-green */
+  --primary-foreground: 0 0% 100%;    /* white */
+  --secondary: 60 17% 95%;            /* gray-cream-100 */
+  --secondary-foreground: 0 0% 4%;    /* text-primary */
+  --muted: 60 17% 97%;                /* gray-cream-50 */
+  --muted-foreground: 0 0% 32%;       /* text-secondary */
+  --accent: 60 17% 97%;               /* gray-cream-50 - subtle hover state */
+  --accent-foreground: 0 0% 4%;       /* text-primary */
+  --destructive: 0 72% 51%;           /* Keep for errors */
+  --destructive-foreground: 0 0% 100%;
+  --border: 60 17% 91%;               /* gray-cream-200 */
+  --input: 60 17% 91%;                /* gray-cream-200 */
+  --ring: 60 16% 48%;                 /* moss-green */
+  --radius: 0.5rem;
+
+  /* Semantic color variables - Clear, vibrant indicators */
+  --success: 142 60% 42%;             /* Clear green for positive/accept/researched */
+  --success-foreground: 0 0% 100%;
+  --success-bg: 142 50% 96%;
+  --success-border: 142 60% 42%;
+
+  --error: 0 75% 52%;                 /* Clear red for negative/reject/failed */
+  --error-foreground: 0 0% 100%;
+  --error-bg: 0 50% 96%;
+  --error-border: 0 75% 52%;
+
+  --info: 210 100% 50%;               /* Blue for info */
+  --info-foreground: 0 0% 100%;
+  --warning: 38 92% 50%;              /* Amber for warnings */
+  --warning-foreground: 0 0% 100%;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* Dark mode support */
+.dark {
+  --background: 60 16% 10%;
+  --foreground: 0 0% 98%;
+  --card: 60 16% 12%;
+  --card-foreground: 0 0% 98%;
+  --popover: 60 16% 12%;
+  --popover-foreground: 0 0% 98%;
+  --primary: 60 16% 48%;              /* moss-green stays same */
+  --primary-foreground: 0 0% 0%;
+  --secondary: 60 16% 20%;
+  --secondary-foreground: 0 0% 98%;
+  --muted: 60 16% 20%;
+  --muted-foreground: 0 0% 65%;
+  --accent: 60 16% 20%;               /* gray-cream-900 - dark mode hover */
+  --accent-foreground: 0 0% 98%;
+  --destructive: 0 63% 55%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 60 16% 20%;
+  --input: 60 16% 20%;
+  --ring: 60 16% 48%;
+
+  /* Semantic colors - dark mode */
+  --success: 142 60% 50%;
+  --success-foreground: 0 0% 0%;
+  --success-bg: 142 30% 10%;
+  --success-border: 142 60% 50%;
+
+  --error: 0 75% 58%;
+  --error-foreground: 0 0% 0%;
+  --error-bg: 0 30% 10%;
+  --error-border: 0 75% 58%;
+}
+
+/* ============================================================================
+   BASE STYLES
+   ============================================================================ */
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+}
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Typography - Serif for headings */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-crimson-pro, 'Crimson Pro'), serif;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+/* ============================================================================
+   UTILITY CLASSES - Textures & Patterns
+   ============================================================================ */
+
+@layer components {
+  /* ===== TEXTURES ===== */
+
+  /* Dithered texture overlay - archival/legal aesthetic */
+  .texture-overlay {
+    position: relative;
+  }
+
+  .texture-overlay::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(circle at 1px 1px, rgba(142, 142, 103, 0.025) 1px, transparent 0);
+    background-size: 4px 4px;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* Subtle paper-like texture - low contrast dithered */
+  .paper-texture {
+    background-image:
+      radial-gradient(circle at 1px 1px, rgba(0, 0, 0, 0.015) 1px, transparent 0);
+    background-size: 3px 3px;
+  }
+
+  /* Enhanced paper texture for cards */
+  .paper-texture-card {
+    background-image:
+      radial-gradient(circle at 1px 1px, rgba(0, 0, 0, 0.02) 1px, transparent 0);
+    background-size: 2px 2px;
+  }
+
+  /* Moss green tinted texture - for subtle backgrounds */
+  .moss-texture {
+    background-color: hsl(var(--gray-cream-25));
+    background-image:
+      radial-gradient(circle at 1px 1px, rgba(142, 142, 103, 0.04) 1px, transparent 0);
+    background-size: 4px 4px;
+  }
+
+  /* ===== PATTERNS ===== */
+
+  /* Vertical stripe pattern - inspired by logomark pillars */
+  .pattern-stripes {
+    background-image: repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 10px,
+      hsl(var(--moss-green) / 0.03) 10px,
+      hsl(var(--moss-green) / 0.03) 11px
+    );
+  }
+
+  /* Dense vertical stripes - for headers/sections */
+  .pattern-stripes-dense {
+    background-image: repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 6px,
+      hsl(var(--moss-green) / 0.05) 6px,
+      hsl(var(--moss-green) / 0.05) 7px
+    );
+  }
+
+  /* Subtle diagonal lines - legal document aesthetic */
+  .pattern-diagonal {
+    background-image: repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 10px,
+      hsl(var(--moss-green) / 0.02) 10px,
+      hsl(var(--moss-green) / 0.02) 11px
+    );
+  }
+
+  /* Grid pattern - for backgrounds */
+  .pattern-grid {
+    background-image:
+      linear-gradient(hsl(var(--border) / 0.5) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--border) / 0.5) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+
+  /* Subtle dots pattern */
+  .pattern-dots {
+    background-image:
+      radial-gradient(circle, hsl(var(--moss-green) / 0.08) 1px, transparent 1px);
+    background-size: 16px 16px;
+  }
+
+  /* ===== CARD STYLES ===== */
+
+  /* Archival card - paper texture with subtle border */
+  .archival-card {
+    @apply bg-card border border-border rounded-lg shadow-sm;
+    @apply paper-texture-card;
+  }
+
+  /* Document card - heavier texture, like aged paper */
+  .document-card {
+    @apply bg-card border-2 border-border rounded-lg shadow-md;
+    background-image:
+      radial-gradient(circle at 1px 1px, rgba(0, 0, 0, 0.025) 1px, transparent 0);
+    background-size: 3px 3px;
+  }
+
+  /* Case file card - with stripe pattern */
+  .case-card {
+    @apply bg-card border border-border rounded-lg shadow-sm;
+    @apply paper-texture-card pattern-stripes;
+  }
+
+  /* ===== SECTION DECORATORS ===== */
+
+  /* Section with subtle top border pattern */
+  .section-legal {
+    @apply border-t-2 border-moss-green/20 pt-6;
+    position: relative;
+  }
+
+  .section-legal::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: 0;
+    right: 0;
+    height: 8px;
+    background-image: repeating-linear-gradient(
+      90deg,
+      hsl(var(--moss-green) / 0.1),
+      hsl(var(--moss-green) / 0.1) 4px,
+      transparent 4px,
+      transparent 8px
+    );
+  }
+
+  /* Divider with pattern */
+  .divider-pattern {
+    height: 1px;
+    background-image: repeating-linear-gradient(
+      90deg,
+      hsl(var(--border)),
+      hsl(var(--border)) 4px,
+      transparent 4px,
+      transparent 8px
+    );
+  }
+
+  /* ===== BACKGROUND SECTIONS ===== */
+
+  /* Hero section with texture */
+  .hero-texture {
+    @apply bg-gray-cream-25 paper-texture pattern-stripes;
+  }
+
+  /* Content section with subtle texture */
+  .content-section {
+    @apply bg-background paper-texture;
+  }
+
+  /* Accent section - moss green tinted */
+  .accent-section {
+    @apply moss-texture;
+  }
+
+  /* ===== BUTTON STYLES ===== */
+
+  /* Primary button - moss green */
+  .btn-primary {
+    @apply bg-moss-green text-white hover:bg-moss-green-400;
+    @apply font-medium tracking-wide transition-colors;
+    @apply rounded-md px-4 py-2.5;
+  }
+
+  /* Secondary button - gray cream */
+  .btn-secondary {
+    @apply bg-gray-cream-100 text-foreground hover:bg-gray-cream-200;
+    @apply font-medium tracking-wide transition-colors;
+    @apply rounded-md px-4 py-2.5;
+  }
+
+  /* Outline button */
+  .btn-outline {
+    @apply border-2 border-moss-green text-moss-green hover:bg-moss-green-50;
+    @apply font-medium tracking-wide transition-colors;
+    @apply rounded-md px-4 py-2.5;
+  }
+
+  /* Success/Accept button */
+  .btn-accept,
+  .btn-success {
+    @apply bg-success text-success-foreground hover:bg-moss-green-400;
+    @apply font-medium tracking-wide transition-colors;
+    @apply rounded-md px-4 py-2.5;
+  }
+
+  /* Error/Reject button */
+  .btn-reject,
+  .btn-error {
+    @apply bg-error text-error-foreground hover:bg-gray-cream-900;
+    @apply font-medium tracking-wide transition-colors;
+    @apply rounded-md px-4 py-2.5;
+  }
+
+  /* ===== BADGE STYLES ===== */
+
+  .badge-success {
+    @apply bg-success-bg text-success border-success-border;
+    @apply px-2 py-1 rounded-md text-sm font-medium border;
+  }
+
+  .badge-error {
+    @apply bg-error-bg text-error border-error-border;
+    @apply px-2 py-1 rounded-md text-sm font-medium border;
+  }
+
+  .badge-info {
+    @apply bg-info/10 text-info border-info/20;
+    @apply px-2 py-1 rounded-md text-sm font-medium border;
+  }
+
+  .badge-warning {
+    @apply bg-warning/10 text-warning border-warning/20;
+    @apply px-2 py-1 rounded-md text-sm font-medium border;
+  }
+}
+
+/* ============================================================================
+   CUSTOM COMPONENT STYLES
+   ============================================================================ */
+
+/* Custom slider styling */
+.slider {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.slider::-webkit-slider-track {
+  background: hsl(var(--gray-cream-300));
+  height: 8px;
+  border-radius: 4px;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 16px;
+  width: 16px;
+  border-radius: 50%;
+  background: hsl(var(--moss-green));
+  cursor: pointer;
+  border: 2px solid hsl(var(--white));
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.slider::-moz-range-track {
+  background: hsl(var(--gray-cream-300));
+  height: 8px;
+  border-radius: 4px;
+  border: none;
+}
+
+.slider::-moz-range-thumb {
+  height: 16px;
+  width: 16px;
+  border-radius: 50%;
+  background: hsl(var(--moss-green));
+  cursor: pointer;
+  border: 2px solid hsl(var(--white));
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* ============================================================================
+   TYPOGRAPHY UTILITIES
+   ============================================================================ */
+
+/* Font sizes matching design system */
+.text-hero {
+  font-size: 48px;
+  line-height: 56px;
+}
+
+.text-section {
+  font-size: 32px;
+  line-height: 40px;
+}
+
+.text-subhead {
+  font-size: 24px;
+  line-height: 32px;
+}
+
+.text-body {
+  font-size: 16px;
+  line-height: 24px;
+}
+
+.text-ui {
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.text-caption {
+  font-size: 12px;
+  line-height: 16px;
+}
+
+/* ============================================================================
+   RESPONSIVE UTILITIES
+   ============================================================================ */
+
+/* Container with max-width and padding */
+.container {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 2rem;
+  padding-right: 2rem;
+}
+
+@media (min-width: 640px) {
+  .container {
+    max-width: 640px;
+  }
+}
+
+@media (min-width: 768px) {
+  .container {
+    max-width: 768px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container {
+    max-width: 1024px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .container {
+    max-width: 1280px;
+  }
+}
+
+@media (min-width: 1400px) {
+  .container {
+    max-width: 1400px;
+  }
+}
+
+/* ============================================================================
+   ACCESSIBILITY
+   ============================================================================ */
+
+/* Focus styles */
+*:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+/* Skip to content link for screen readers */
+.skip-to-content {
+  position: absolute;
+  left: -9999px;
+  z-index: 999;
+}
+
+.skip-to-content:focus {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  background: hsl(var(--moss-green));
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
