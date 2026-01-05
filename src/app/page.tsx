@@ -151,58 +151,42 @@ export default async function HomePage() {
               <SearchSection compact />
             </div>
 
-            {/* Right: Key Stats Grid */}
+            {/* Right: Charts Grid */}
             <div className="space-y-6">
-              <h2 className="text-section font-serif">At a Glance</h2>
-
-              {/* Quick Stats in 2x2 Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Top Universities - Compact */}
-                <StatCard title="Top Universities">
-                  <div className="space-y-2">
-                    {stats.education.slice(0, 10).map((item, idx) => (
-                      <div key={idx} className="flex justify-between text-body items-center py-1 px-2 rounded hover:bg-gray-cream-100 transition-colors">
-                        <span className="text-muted-foreground truncate mr-2 text-sm">{item.university}</span>
-                        <span className="font-semibold text-moss-green whitespace-nowrap text-sm">{item.percentage}%</span>
+                {/* Education Pie Chart */}
+                <StatCard title="Education Distribution">
+                  <EducationChart education={stats.education} />
+                </StatCard>
+
+                {/* Geographic Distribution */}
+                <StatCard title="Geographic Distribution">
+                  <GeographyChart geography={stats.geography} />
+                </StatCard>
+
+                {/* Occupation Distribution */}
+                <StatCard title="Top Occupations & Roles">
+                  <div className="h-96">
+                    <BarChart
+                      data={occupationChartData}
+                      dataKey="value"
+                      color="hsl(var(--moss-green-400))"
+                      height={384}
+                    />
+                  </div>
+                  <div className="mt-6 space-y-2.5">
+                    {stats.occupations.slice(0, 5).map((item, idx) => (
+                      <div key={idx} className="flex justify-between text-body items-center py-1.5 px-2 rounded">
+                        <span className="text-muted-foreground truncate mr-2">{item.title}</span>
+                        <span className="font-semibold text-moss-green-400 whitespace-nowrap">{item.percentage}%</span>
                       </div>
                     ))}
                   </div>
                 </StatCard>
 
-                {/* Top Locations - Compact */}
-                <StatCard title="Top Locations">
-                  <div className="space-y-2">
-                    {stats.geography.slice(0, 10).map((item, idx) => (
-                      <div key={idx} className="flex justify-between text-body items-center py-1 px-2 rounded hover:bg-gray-cream-100 transition-colors">
-                        <span className="text-muted-foreground truncate mr-2 text-sm">{item.location}</span>
-                        <span className="font-semibold text-success whitespace-nowrap text-sm">{item.percentage}%</span>
-                      </div>
-                    ))}
-                  </div>
-                </StatCard>
-
-                {/* Top Roles - Compact */}
-                <StatCard title="Top Roles">
-                  <div className="space-y-2">
-                    {stats.occupations.slice(0, 10).map((item, idx) => (
-                      <div key={idx} className="flex justify-between text-body items-center py-1 px-2 rounded hover:bg-gray-cream-100 transition-colors">
-                        <span className="text-muted-foreground truncate mr-2 text-sm">{item.title}</span>
-                        <span className="font-semibold text-moss-green-400 whitespace-nowrap text-sm">{item.percentage}%</span>
-                      </div>
-                    ))}
-                  </div>
-                </StatCard>
-
-                {/* Top Interests - Compact */}
-                <StatCard title="Top Interests">
-                  <div className="space-y-2">
-                    {stats.interests.slice(0, 10).map((item, idx) => (
-                      <div key={idx} className="flex justify-between text-body items-center py-1 px-2 rounded hover:bg-gray-cream-100 transition-colors">
-                        <span className="text-muted-foreground truncate mr-2 text-sm">{item.canonical_name}</span>
-                        <span className="font-semibold text-info whitespace-nowrap text-sm">{item.percentage}%</span>
-                      </div>
-                    ))}
-                  </div>
+                {/* Top Companies Distribution */}
+                <StatCard title="Top Companies">
+                  <CompaniesChart companies={stats.companies} />
                 </StatCard>
               </div>
             </div>
@@ -210,91 +194,51 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Detailed Statistics Section */}
+      {/* Top Interests & Additional Insights Section */}
       <section className="content-section py-12 border-t border-border">
         <div className="container mx-auto">
-          <h2 className="text-section font-serif mb-10 text-center">Detailed Analytics</h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-            {/* Education Pie Chart */}
-            <StatCard title="Education Distribution">
-              <EducationChart education={stats.education} />
-            </StatCard>
-
-            {/* Geographic Distribution */}
-            <StatCard title="Geographic Distribution">
-              <GeographyChart geography={stats.geography} />
-            </StatCard>
-
-            {/* Occupation Distribution */}
-            <StatCard title="Top Occupations & Roles">
-              <div className="h-96">
-                <BarChart
-                  data={occupationChartData}
-                  dataKey="value"
-                  color="hsl(var(--moss-green-400))"
-                  height={384}
-                />
-              </div>
-              <div className="mt-6 space-y-2.5">
-                {stats.occupations.slice(0, 5).map((item, idx) => (
-                  <div key={idx} className="flex justify-between text-body items-center py-1.5 px-2 rounded hover:bg-gray-cream-100 transition-colors">
-                    <span className="text-muted-foreground truncate mr-2">{item.title}</span>
-                    <span className="font-semibold text-moss-green-400 whitespace-nowrap">{item.percentage}%</span>
+          <StatCard title="Top Interests & Additional Insights">
+            <div className="space-y-4">
+              {/* Top row: Interests list and Average Interests side by side */}
+              <div className="grid grid-cols-2 gap-4">
+                {/* Top Interests List */}
+                <div>
+                  <h4 className="text-ui font-serif text-muted-foreground mb-2">Top Interests</h4>
+                  <div className="space-y-1.5">
+                    {stats.interests.slice(0, 8).map((item, idx) => (
+                      <div key={idx} className="flex justify-between text-body items-center py-1 px-2 rounded hover:bg-gray-cream-100 transition-colors">
+                        <span className="text-muted-foreground truncate mr-2 text-sm">{item.canonical_name}</span>
+                        <span className="font-semibold text-info whitespace-nowrap text-sm">{item.percentage}%</span>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            </StatCard>
+                </div>
 
-            {/* Top Companies Distribution */}
-            <StatCard title="Top Companies">
-              <CompaniesChart companies={stats.companies} />
-            </StatCard>
+                {/* Additional Insights */}
+                <div className="space-y-4">
+                  {/* Average Interests */}
+                  <div className="bg-moss-green/5 rounded-lg p-3 border border-moss-green/20">
+                    <h4 className="text-sm font-serif text-moss-green-600 mb-0.5">Average Interests</h4>
+                    <p className="text-2xl font-serif font-bold text-moss-green">{stats.other_stats.avg_interests_per_founder}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">per founder</p>
+                  </div>
 
-            {/* Top Interests & Additional Insights - Combined */}
-            <StatCard title="Top Interests & Additional Insights">
-              <div className="space-y-4">
-                {/* Top row: Interests list and Average Interests side by side */}
-                <div className="grid grid-cols-2 gap-4">
-                  {/* Top Interests List */}
+                  {/* Top Platforms */}
                   <div>
-                    <h4 className="text-ui font-serif text-muted-foreground mb-2">Top Interests</h4>
+                    <h4 className="text-ui font-serif text-muted-foreground mb-2">Top Platforms</h4>
                     <div className="space-y-1.5">
-                      {stats.interests.slice(0, 8).map((item, idx) => (
+                      {stats.other_stats.platform_distribution.slice(0, 5).map((item, idx) => (
                         <div key={idx} className="flex justify-between text-body items-center py-1 px-2 rounded hover:bg-gray-cream-100 transition-colors">
-                          <span className="text-muted-foreground truncate mr-2 text-sm">{item.canonical_name}</span>
-                          <span className="font-semibold text-info whitespace-nowrap text-sm">{item.percentage}%</span>
+                          <span className="text-muted-foreground truncate mr-2 text-sm">{item.platform}</span>
+                          <span className="font-semibold whitespace-nowrap text-sm">{item.percentage}%</span>
                         </div>
                       ))}
                     </div>
                   </div>
-
-                  {/* Additional Insights */}
-                  <div className="space-y-4">
-                    {/* Average Interests */}
-                    <div className="bg-moss-green/5 rounded-lg p-3 border border-moss-green/20">
-                      <h4 className="text-sm font-serif text-moss-green-600 mb-0.5">Average Interests</h4>
-                      <p className="text-2xl font-serif font-bold text-moss-green">{stats.other_stats.avg_interests_per_founder}</p>
-                      <p className="text-xs text-muted-foreground mt-0.5">per founder</p>
-                    </div>
-
-                    {/* Top Platforms */}
-                    <div>
-                      <h4 className="text-ui font-serif text-muted-foreground mb-2">Top Platforms</h4>
-                      <div className="space-y-1.5">
-                        {stats.other_stats.platform_distribution.slice(0, 5).map((item, idx) => (
-                          <div key={idx} className="flex justify-between text-body items-center py-1 px-2 rounded hover:bg-gray-cream-100 transition-colors">
-                            <span className="text-muted-foreground truncate mr-2 text-sm">{item.platform}</span>
-                            <span className="font-semibold whitespace-nowrap text-sm">{item.percentage}%</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
                 </div>
               </div>
-            </StatCard>
-          </div>
+            </div>
+          </StatCard>
         </div>
       </section>
 
