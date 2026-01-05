@@ -1,22 +1,14 @@
-import { getFounderById, getAllFounders } from '@/lib/api/yc-batch'
+import { getFounderById } from '@/lib/api/yc-batch'
 import Link from 'next/link'
 import Image from 'next/image'
 import { notFound } from 'next/navigation'
 
+// Force dynamic rendering for this page
+export const dynamic = 'force-dynamic'
+
 interface PageProps {
   params: {
     personId: string
-  }
-}
-
-export async function generateStaticParams() {
-  try {
-    const founders = await getAllFounders()
-    return founders.map((founder) => ({
-      personId: founder.person_id,
-    }))
-  } catch {
-    return []
   }
 }
 
