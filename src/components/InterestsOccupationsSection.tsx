@@ -38,16 +38,19 @@ export function InterestsOccupationsSection({ interests, occupations }: Interest
         <h4 className="text-ui font-serif text-muted-foreground mb-2">Top Interests</h4>
         <p className="text-xs text-muted-foreground mb-3 italic">Click to see founders</p>
         <div className="space-y-1.5">
-          {interests.slice(0, 8).map((item, idx) => (
-            <button
-              key={idx}
-              onClick={() => setSelectedInterest(item.canonical_name)}
-              className="w-full flex justify-between text-body items-center py-1 px-2 rounded hover:bg-moss-green/10 hover:border-moss-green/30 border border-transparent transition-all cursor-pointer"
-            >
-              <span className="text-muted-foreground truncate mr-2 text-sm">{item.canonical_name}</span>
-              <span className="font-semibold text-info whitespace-nowrap text-sm">{item.percentage}%</span>
-            </button>
-          ))}
+          {interests
+            .filter(item => item.canonical_name.toLowerCase() !== 'other')
+            .slice(0, 8)
+            .map((item, idx) => (
+              <button
+                key={idx}
+                onClick={() => setSelectedInterest(item.canonical_name)}
+                className="w-full flex justify-between text-body items-center py-1 px-2 rounded hover:bg-moss-green/10 hover:border-moss-green/30 border border-transparent transition-all cursor-pointer"
+              >
+                <span className="text-muted-foreground truncate mr-2 text-sm">{item.canonical_name}</span>
+                <span className="font-semibold text-info whitespace-nowrap text-sm">{item.percentage}%</span>
+              </button>
+            ))}
         </div>
       </div>
 

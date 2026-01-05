@@ -141,12 +141,15 @@ export default async function HomePage() {
                 <StatCard title="Top Interests">
                   <div className="h-96">
                     <BarChart
-                      data={stats.interests.slice(0, 10).map(item => ({
-                        name: item.canonical_name.length > 20 ? item.canonical_name.substring(0, 20) + '...' : item.canonical_name,
-                        value: item.count,
-                        percentage: item.percentage,
-                        fullName: item.canonical_name,
-                      }))}
+                      data={stats.interests
+                        .filter(item => item.canonical_name.toLowerCase() !== 'other')
+                        .slice(0, 10)
+                        .map(item => ({
+                          name: item.canonical_name.length > 20 ? item.canonical_name.substring(0, 20) + '...' : item.canonical_name,
+                          value: item.percentage,
+                          percentage: item.percentage,
+                          fullName: item.canonical_name,
+                        }))}
                       dataKey="value"
                       color="hsl(var(--info))"
                       height={384}
