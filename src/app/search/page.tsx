@@ -389,10 +389,10 @@ function SearchPageContent() {
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   onClick={(e) => e.stopPropagation()}
-                                  className="block text-xs text-muted-foreground hover:text-moss-green transition-colors truncate"
-                                  title={datapoint.title || datapoint.url}
+                                  className="block text-xs text-muted-foreground hover:text-moss-green transition-colors break-all"
+                                  title={datapoint.url}
                                 >
-                                  {datapoint.title || new URL(datapoint.url).hostname}
+                                  {datapoint.url}
                                 </a>
                               ))}
                             </div>
@@ -413,10 +413,10 @@ function SearchPageContent() {
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   onClick={(e) => e.stopPropagation()}
-                                  className="block text-xs text-muted-foreground hover:text-moss-green transition-colors truncate"
-                                  title={datapoint.title || datapoint.url}
+                                  className="block text-xs text-muted-foreground hover:text-moss-green transition-colors break-all"
+                                  title={datapoint.url}
                                 >
-                                  {datapoint.title || new URL(datapoint.url).hostname}
+                                  {datapoint.url}
                                 </a>
                               ))}
                             </div>
