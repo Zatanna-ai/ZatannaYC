@@ -16,7 +16,8 @@ interface GeographyChartProps {
 export function GeographyChart({ geography }: GeographyChartProps) {
   const geographyChartData = geography.slice(0, 10).map(item => ({
     name: item.location.length > 20 ? item.location.substring(0, 20) + '...' : item.location,
-    value: item.percentage,
+    value: item.count, // Use count for bar chart sizing
+    percentage: item.percentage, // Store original percentage for tooltip display
     fullName: item.location,
   }))
 

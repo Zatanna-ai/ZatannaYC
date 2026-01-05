@@ -6,6 +6,7 @@ import { CompaniesModalClient } from '@/components/CompaniesModalClient'
 import { CompaniesChart } from '@/components/CompaniesChart'
 import { EducationChart } from '@/components/EducationChart'
 import { GeographyChart } from '@/components/GeographyChart'
+import { InterestsOccupationsSection } from '@/components/InterestsOccupationsSection'
 import Link from 'next/link'
 
 export default async function HomePage() {
@@ -52,33 +53,11 @@ export default async function HomePage() {
   }
 
   // Prepare chart data
-  const topInterests = stats.interests.slice(0, 10).map(item => ({
-    name: item.canonical_name.length > 20 ? item.canonical_name.substring(0, 20) + '...' : item.canonical_name,
-    value: item.percentage,
-    fullName: item.canonical_name,
-  }))
-
-
   const occupationChartData = stats.occupations.slice(0, 10).map(item => ({
     name: item.title.length > 20 ? item.title.substring(0, 20) + '...' : item.title,
-    value: item.percentage,
+    value: item.count, // Use count for bar chart sizing
+    percentage: item.percentage, // Store original percentage for tooltip display
     fullName: item.title,
-  }))
-
-  const educationPieData = stats.education.slice(0, 8).map(item => ({
-    name: item.university,
-    value: item.percentage,
-  }))
-
-  const companiesChartData = stats.companies.slice(0, 10).map(item => ({
-    name: item.name.length > 20 ? item.name.substring(0, 20) + '...' : item.name,
-    value: item.percentage,
-    fullName: item.name,
-  }))
-
-  const companiesPieData = stats.companies.slice(0, 8).map(item => ({
-    name: item.name,
-    value: item.percentage,
   }))
 
   return (
@@ -110,7 +89,7 @@ export default async function HomePage() {
             <h1 className="text-hero font-serif mb-3">YC Batch W26 Insights</h1>
             <p className="text-body text-muted-foreground mb-4 max-w-3xl">
               All of these {stats.total_founders} people were researched in <span className="font-semibold text-moss-green">5 minutes</span>.
-              For in-depth data for all of YC, or sales related use cases involving anyone on the planet, {' '}
+              For in-depth data for all of YC, or sales / demographic related use cases involving anyone on the planet, {' '}
               <a href="mailto:rithvik@zatanna.ai" className="text-moss-green hover:underline font-medium">
                 email us at rithvik@zatanna.ai
               </a>
@@ -164,7 +143,7 @@ export default async function HomePage() {
                   <GeographyChart geography={stats.geography} />
                 </StatCard>
 
-                {/* Occupation Distribution */}
+                {/* Occupation Distribution with clickable list below */}
                 <StatCard title="Top Occupations & Roles">
                   <div className="h-96">
                     <BarChart
@@ -173,14 +152,6 @@ export default async function HomePage() {
                       color="hsl(var(--moss-green-400))"
                       height={384}
                     />
-                  </div>
-                  <div className="mt-6 space-y-2.5">
-                    {stats.occupations.slice(0, 5).map((item, idx) => (
-                      <div key={idx} className="flex justify-between text-body items-center py-1.5 px-2 rounded">
-                        <span className="text-muted-foreground truncate mr-2">{item.title}</span>
-                        <span className="font-semibold text-moss-green-400 whitespace-nowrap">{item.percentage}%</span>
-                      </div>
-                    ))}
                   </div>
                 </StatCard>
 
@@ -201,18 +172,11 @@ export default async function HomePage() {
             <div className="space-y-4">
               {/* Top row: Interests list and Average Interests side by side */}
               <div className="grid grid-cols-2 gap-4">
-                {/* Top Interests List */}
-                <div>
-                  <h4 className="text-ui font-serif text-muted-foreground mb-2">Top Interests</h4>
-                  <div className="space-y-1.5">
-                    {stats.interests.slice(0, 8).map((item, idx) => (
-                      <div key={idx} className="flex justify-between text-body items-center py-1 px-2 rounded hover:bg-gray-cream-100 transition-colors">
-                        <span className="text-muted-foreground truncate mr-2 text-sm">{item.canonical_name}</span>
-                        <span className="font-semibold text-info whitespace-nowrap text-sm">{item.percentage}%</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                {/* Top Interests List - Now Clickable */}
+                <InterestsOccupationsSection
+                  interests={stats.interests}
+                  occupations={stats.occupations}
+                />
 
                 {/* Additional Insights */}
                 <div className="space-y-4">
