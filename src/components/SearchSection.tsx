@@ -4,34 +4,34 @@ import { useState } from 'react'
 
 const exampleSearches = [
   {
-    query: 'founders that like eating sushi',
-    icon: '🍣',
+    query: 'founders that like basketball',
+    icon: '🏀',
     category: 'Interests',
   },
   {
-    query: 'founders working on consumer hardware',
-    icon: '🔧',
-    category: 'Industry',
+    query: 'founders that like philosophy',
+    icon: '📚',
+    category: 'Interests',
+  },
+  {
+    query: 'founders that like weightlifting',
+    icon: '💪',
+    category: 'Interests',
+  },
+  {
+    query: 'founders from europe',
+    icon: '🇪🇺',
+    category: 'Location',
+  },
+  {
+    query: 'founders who were product managers',
+    icon: '👔',
+    category: 'Role',
   },
   {
     query: 'CTOs who went to Stanford',
     icon: '🎓',
     category: 'Education',
-  },
-  {
-    query: 'founders interested in robotics',
-    icon: '🤖',
-    category: 'Interests',
-  },
-  {
-    query: 'CEOs from San Francisco',
-    icon: '📍',
-    category: 'Location',
-  },
-  {
-    query: 'founders with photography hobbies',
-    icon: '📸',
-    category: 'Interests',
   },
 ]
 
