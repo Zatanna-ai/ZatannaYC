@@ -7,7 +7,8 @@
  * - /api/v1/yc-founders/:id - Individual founder details
  */
 
-const API_BASE_URL = 'https://sgapi.zatanna.ai'
+import { API_BASE_URL, YC_CASE_SESSION_ID } from './config'
+
 const API_KEY = process.env.NEXT_PUBLIC_API_KEY || ''
 
 export interface Founder {
@@ -111,7 +112,13 @@ export interface BatchStats {
 }
 
 async function fetchAPI(endpoint: string, options: RequestInit = {}) {
-  const url = `${API_BASE_URL}${endpoint}`
+  // Add case_session_id to query params if not already present
+  const urlObj = new URL(`${API_BASE_URL}${endpoint}`)
+  if (!urlObj.searchParams.has('case_session_id')) {
+    urlObj.searchParams.set('case_session_id', YC_CASE_SESSION_ID)
+  }
+  const url = urlObj.toString()
+  
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     ...(options.headers as Record<string, string> || {}),
@@ -294,7 +301,7 @@ export async function getTopCompanies(limit: number = 50): Promise<{
  */
 export async function getBatchStats(): Promise<BatchStats> {
   try {
-    console.log('[YC Batch API] Fetching dashboard stats from:', `${API_BASE_URL}/api/v1/yc-dashboard/stats?limit=20`)
+    console.log('[YC Batch API] Fetching dashboard stats from:', `${API_BASE_URL}/api/v1/yc-dashboard/stats?limit=20&case_session_id=${YC_CASE_SESSION_ID}`)
     // Use the new dashboard stats endpoint
     const response = await fetchAPI('/api/v1/yc-dashboard/stats?limit=20')
     console.log('[YC Batch API] Dashboard stats response:', response.success ? 'success' : 'failed', response)

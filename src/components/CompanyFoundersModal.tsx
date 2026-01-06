@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { LoadingSpinner } from './LoadingSpinner'
 import Link from 'next/link'
+import { API_BASE_URL, YC_CASE_SESSION_ID } from '@/lib/config'
 
 interface Founder {
   id: string
@@ -36,9 +37,8 @@ export function CompanyFoundersModal({ isOpen, onClose, companyName }: CompanyFo
     setLoading(true)
     setError(null)
     try {
-      const API_BASE_URL = 'https://sgapi.zatanna.ai'
       const encodedCompanyName = encodeURIComponent(companyName)
-      const response = await fetch(`${API_BASE_URL}/api/v1/yc-dashboard/companies/${encodedCompanyName}/founders`)
+      const response = await fetch(`${API_BASE_URL}/api/v1/yc-dashboard/companies/${encodedCompanyName}/founders?case_session_id=${YC_CASE_SESSION_ID}`)
       
       if (!response.ok) {
         throw new Error('Failed to fetch founders')

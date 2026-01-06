@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useSearchParams } from 'next/navigation'
+import { API_BASE_URL, YC_CASE_SESSION_ID } from '@/lib/config'
 
 interface MatchingEntity {
   entity_type: string
@@ -56,10 +57,9 @@ function SearchPageContent() {
     setHasSearched(true)
 
     try {
-      const API_BASE_URL = 'https://sgapi.zatanna.ai'
       const API_KEY = process.env.NEXT_PUBLIC_API_KEY || ''
 
-      const response = await fetch(`${API_BASE_URL}/api/v1/discover-yc`, {
+      const response = await fetch(`${API_BASE_URL}/api/v1/discover-yc?case_session_id=${YC_CASE_SESSION_ID}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

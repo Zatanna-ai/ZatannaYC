@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { LoadingSpinner } from './LoadingSpinner'
 import Link from 'next/link'
+import { API_BASE_URL, YC_CASE_SESSION_ID } from '@/lib/config'
 
 interface Founder {
   id: string
@@ -36,9 +37,8 @@ export function EducationFoundersModal({ isOpen, onClose, schoolName }: Educatio
     setLoading(true)
     setError(null)
     try {
-      const API_BASE_URL = 'https://sgapi.zatanna.ai'
       const encodedSchoolName = encodeURIComponent(schoolName)
-      const url = `${API_BASE_URL}/api/v1/yc-dashboard/schools/${encodedSchoolName}/founders`
+      const url = `${API_BASE_URL}/api/v1/yc-dashboard/schools/${encodedSchoolName}/founders?case_session_id=${YC_CASE_SESSION_ID}`
       
       console.log('[EducationFoundersModal] Fetching from:', url)
       const response = await fetch(url)
