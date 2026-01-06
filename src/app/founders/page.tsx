@@ -2,6 +2,9 @@ import { getAllFounders } from '@/lib/api/yc-batch'
 import Link from 'next/link'
 import Image from 'next/image'
 
+// Force dynamic rendering since we're fetching live data from API
+export const dynamic = 'force-dynamic'
+
 export default async function FoundersPage() {
   let founders
   let error: string | null = null

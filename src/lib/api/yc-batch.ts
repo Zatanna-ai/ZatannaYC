@@ -7,7 +7,7 @@
  * - /api/v1/yc-founders/:id - Individual founder details
  */
 
-import { API_BASE_URL, YC_CASE_SESSION_ID } from './config'
+import { API_BASE_URL, YC_CASE_SESSION_ID } from '../config'
 
 const API_KEY = process.env.NEXT_PUBLIC_API_KEY || ''
 

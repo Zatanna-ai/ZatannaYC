@@ -8,6 +8,9 @@ import { EducationChart } from '@/components/EducationChart'
 import { InterestsListWithModal } from '@/components/InterestsListWithModal'
 import Link from 'next/link'
 
+// Force dynamic rendering since we're fetching live data from API
+export const dynamic = 'force-dynamic'
+
 export default async function HomePage() {
   let stats
   let error: string | null = null
