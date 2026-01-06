@@ -1,6 +1,34 @@
-# YC Batch W26 Report Website
+# Zatanna YC - Monorepo
 
-A comprehensive public-facing website showcasing YC Batch W26 founders with their interests, backgrounds, education, and professional journeys.
+YC Batch W26 Insights Dashboard - Full-stack application with centralized backend and frontend.
+
+## Repository Structure
+
+```
+ZatannaYC/
+├── backend/          # API service (Express + TypeScript)
+│   ├── src/
+│   │   ├── routes/   # API endpoints
+│   │   ├── services/ # S3 sync, embeddings, etc.
+│   │   ├── database/ # DB connection and queries
+│   │   └── utils/    # Logging, helpers
+│   ├── package.json
+│   └── tsconfig.json
+│
+├── frontend/         # Next.js application
+│   ├── src/
+│   │   ├── app/      # Next.js app router pages
+│   │   ├── components/
+│   │   └── lib/      # API clients, utilities
+│   ├── package.json
+│   └── next.config.js
+│
+└── README.md         # This file
+```
+
+## Overview
+
+A comprehensive website showcasing YC Batch W26 founders with their interests, backgrounds, education, and professional journeys.
 
 ## Features
 
