@@ -5,6 +5,7 @@ import { InterestFoundersModal } from './InterestFoundersModal'
 
 interface Interest {
   canonical_name: string
+  original_name?: string // Database name for API calls
   percentage: number
   count: number
   intensity_breakdown: {
@@ -32,7 +33,7 @@ export function InterestsListWithModal({ interests }: InterestsListWithModalProp
           .map((item, idx) => (
             <button
               key={idx}
-              onClick={() => setSelectedInterest(item.canonical_name)}
+              onClick={() => setSelectedInterest(item.original_name || item.canonical_name.toLowerCase().replace(/\s+/g, '_'))}
               className="w-full flex justify-between text-body items-center py-2 px-3 rounded hover:bg-moss-green/10 hover:border-moss-green/30 border border-transparent transition-all cursor-pointer group relative"
               title="Click to see all founders"
             >

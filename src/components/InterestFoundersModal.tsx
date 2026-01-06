@@ -27,6 +27,10 @@ export function InterestFoundersModal({ isOpen, onClose, interestName }: Interes
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  // Format interest name for display (capitalize first letter, replace underscores with spaces)
+  const displayName = interestName
+    .charAt(0).toUpperCase() + interestName.slice(1).replace(/_/g, ' ')
+
   useEffect(() => {
     if (isOpen && interestName) {
       fetchFounders()
@@ -79,7 +83,7 @@ export function InterestFoundersModal({ isOpen, onClose, interestName }: Interes
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-border">
           <div>
-            <h2 className="text-section font-serif">Founders interested in {interestName}</h2>
+            <h2 className="text-section font-serif">Founders interested in {displayName}</h2>
             <p className="text-body text-muted-foreground mt-1">
               {founders.length} {founders.length === 1 ? 'founder' : 'founders'}
             </p>

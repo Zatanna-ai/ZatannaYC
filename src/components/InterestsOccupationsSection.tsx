@@ -6,6 +6,7 @@ import { OccupationFoundersModal } from './OccupationFoundersModal'
 
 interface Interest {
   canonical_name: string
+  original_name?: string // Database name for API calls
   percentage: number
   count: number
   intensity_breakdown: {
@@ -44,7 +45,7 @@ export function InterestsOccupationsSection({ interests, occupations }: Interest
             .map((item, idx) => (
               <button
                 key={idx}
-                onClick={() => setSelectedInterest(item.canonical_name)}
+                onClick={() => setSelectedInterest(item.original_name || item.canonical_name.toLowerCase().replace(/\s+/g, '_'))}
                 className="w-full flex justify-between text-body items-center py-1 px-2 rounded hover:bg-moss-green/10 hover:border-moss-green/30 border border-transparent transition-all cursor-pointer"
               >
                 <span className="text-muted-foreground truncate mr-2 text-sm">{item.canonical_name}</span>

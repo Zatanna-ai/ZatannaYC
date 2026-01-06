@@ -322,9 +322,11 @@ export async function getBatchStats(): Promise<BatchStats> {
     }))
 
     // Transform top interests from API to match frontend interface
+    // Use original_name for API calls, formatted name for display
     const interests = (data.top_interests || []).map((interest: any) => ({
       activity: interest.name,
-      canonical_name: interest.name,
+      canonical_name: interest.name, // Display name (formatted)
+      original_name: interest.original_name || interest.name.toLowerCase().replace(/\s+/g, '_'), // Database name for API calls
       count: interest.count,
       percentage: Math.round((interest.count / total) * 100 * 10) / 10,
       intensity_breakdown: {
