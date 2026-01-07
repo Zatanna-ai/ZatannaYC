@@ -1,1 +1,0 @@
-self.__REACT_LOADABLE_MANIFEST="{\"lib/api/yc-batch.ts -> ./mock-data\":{\"id\":\"lib/api/yc-batch.ts -> ./mock-data\",\"files\":[\"static/chunks/_app-pages-browser_src_lib_api_mock-data_ts.js\"]}}"
