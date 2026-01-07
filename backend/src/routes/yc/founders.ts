@@ -158,13 +158,42 @@ router.get("/", async (req, res) => {
                     }
                 }
 
-                // Get LinkedIn URL from datapoint_entity_index
-                const linkedinEntity = await dbInstance
-                    .selectFrom("datapoint_entity_index")
-                    .select("source_url")
+                // Get LinkedIn URL - priority: 1) high confidence datapoint, 2) enriched profile
+                // First check for high-confidence LinkedIn datapoints
+                const highConfidenceLinkedinDatapoint = await dbInstance
+                    .selectFrom("person_datapoints")
+                    .select("url")
                     .where("person_id", "=", founder.id)
-                    .where("source_name", "=", "linkedin_enrichment")
+                    .where("type", "=", "linkedin")
+                    .where("status", "!=", "rejected")
+                    .where("confidence", ">", 0.8)
+                    .orderBy("confidence", "desc")
                     .executeTakeFirst();
+
+                let linkedinEntity: { source_url: string } | undefined;
+
+                if (highConfidenceLinkedinDatapoint) {
+                    // Use high-confidence datapoint
+                    linkedinEntity = { source_url: highConfidenceLinkedinDatapoint.url };
+                } else {
+                    // Fall back to LinkedIn URL with most entities extracted
+                    const linkedinSourceUrls = await dbInstance
+                        .selectFrom("datapoint_entity_index")
+                        .select((eb) => [
+                            "source_url",
+                            eb.fn.count("id").as("entity_count")
+                        ])
+                        .where("person_id", "=", founder.id)
+                        .where("source_name", "=", "linkedin_enrichment")
+                        .where("source_url", "like", "%linkedin.com/in/%")
+                        .groupBy("source_url")
+                        .orderBy("entity_count", "desc")
+                        .executeTakeFirst();
+
+                    if (linkedinSourceUrls && Number(linkedinSourceUrls.entity_count) > 5) {
+                        linkedinEntity = { source_url: linkedinSourceUrls.source_url };
+                    }
+                }
 
                 // Get top occupation from entity index (most confident one)
                 const topOccupation = await dbInstance
@@ -195,7 +224,7 @@ router.get("/", async (req, res) => {
                     ])
                     .where("person_id", "=", founder.id)
                     .where("entity_type", "=", "company")
-                    .where("confidence", ">", 0.35)
+                    .where("confidence", ">", 0.8)
                     .execute();
 
                 // Extract unique company names (deduplicate in JavaScript)
@@ -214,7 +243,7 @@ router.get("/", async (req, res) => {
                     .select(["ce.name"])
                     .where("dei.person_id", "=", founder.id)
                     .where("dei.entity_type", "=", "university")
-                    .where("dei.confidence", ">", 0.4)
+                    .where("dei.confidence", ">", 0.8)
                     .orderBy("dei.confidence", "desc")
                     .limit(3)
                     .execute();
@@ -228,7 +257,7 @@ router.get("/", async (req, res) => {
                     .select(["ce.name"])
                     .where("dei.person_id", "=", founder.id)
                     .where("dei.entity_type", "=", "interest")
-                    .where("dei.confidence", ">", 0.35)
+                    .where("dei.confidence", ">", 0.8)
                     .where("ce.type", "=", "interest_subcategory")
                     .orderBy("dei.confidence", "desc")
                     .limit(5)
@@ -317,6 +346,48 @@ router.get("/:id", async (req, res) => {
             });
         }
 
+        // === STEP 1: Determine the correct LinkedIn URL ===
+        // Get ALL LinkedIn datapoints to find the highest confidence one
+        const allLinkedinDatapoints = await dbInstance
+            .selectFrom("person_datapoints")
+            .select(["id", "url", "type", "confidence", "structured_data", "title"])
+            .where("person_id", "=", id)
+            .where("type", "=", "linkedin")
+            .where("status", "!=", "rejected")
+            .orderBy("confidence", "desc")
+            .execute();
+
+        // Also check datapoint_entity_index for LinkedIn URLs used as sources
+        const linkedinSourceUrls = await dbInstance
+            .selectFrom("datapoint_entity_index")
+            .select((eb) => [
+                "source_url",
+                eb.fn.count("id").as("entity_count")
+            ])
+            .where("person_id", "=", id)
+            .where("source_name", "=", "linkedin_enrichment")
+            .where("source_url", "like", "%linkedin.com/in/%")
+            .groupBy("source_url")
+            .orderBy("entity_count", "desc")
+            .execute();
+
+        // LinkedIn URL selection strategy:
+        // 1. First favor confidence > 0.8 from LinkedIn datapoints
+        // 2. If no high confidence, use LinkedIn URL with most entities extracted (enriched profile)
+        // 3. Last resort: any LinkedIn datapoint we have
+        let selectedLinkedinUrl: string | null = null;
+
+        if (allLinkedinDatapoints.length > 0 && allLinkedinDatapoints[0].confidence > 0.8) {
+            // First priority: high-confidence datapoint
+            selectedLinkedinUrl = allLinkedinDatapoints[0].url;
+        } else if (linkedinSourceUrls.length > 0 && Number(linkedinSourceUrls[0].entity_count) > 5) {
+            // Second priority: LinkedIn URL with most entities extracted (enriched profile)
+            selectedLinkedinUrl = linkedinSourceUrls[0].source_url;
+        } else if (allLinkedinDatapoints.length > 0) {
+            // Last resort: any LinkedIn datapoint
+            selectedLinkedinUrl = allLinkedinDatapoints[0].url;
+        }
+
         // Helper function to parse interest compound value
         // Format: intensity_category_subcategory (e.g., "serious_physical_sports_running")
         const parseInterestValue = (entityValue: string, canonicalName: string | null): { name: string; intensity?: string; category?: string } => {
@@ -356,7 +427,7 @@ router.get("/:id", async (req, res) => {
         };
 
         // Get all entities for this founder, grouped by type
-        const entities = await dbInstance
+        const allEntities = await dbInstance
             .selectFrom("datapoint_entity_index")
             .select((eb) => [
                 "entity_type",
@@ -364,15 +435,26 @@ router.get("/:id", async (req, res) => {
                 "canonical_name",
                 "confidence",
                 "source_url",
+                "source_name",
             ])
             .where("person_id", "=", id)
-            .where("confidence", ">", 0.35)
+            .where("confidence", ">", 0.8)
             .orderBy("entity_type")
             .orderBy("confidence", "desc")
             .execute();
 
+        // Filter entities to only include those from the selected LinkedIn URL or non-LinkedIn sources
+        const entities = selectedLinkedinUrl
+            ? allEntities.filter(e =>
+                e.source_name !== "linkedin_enrichment" || e.source_url === selectedLinkedinUrl
+            )
+            : allEntities;
+
         // Group entities by type
         const groupedEntities: Record<string, Array<{ name: string; confidence: number; source_url: string | null; intensity?: string; category?: string }>> = {};
+
+        // Track seen entities to deduplicate (key: entity_type:name, value: highest confidence entity)
+        const seenEntities: Record<string, { name: string; confidence: number; source_url: string | null; intensity?: string; category?: string }> = {};
 
         for (const entity of entities) {
             if (!groupedEntities[entity.entity_type]) {
@@ -382,25 +464,49 @@ router.get("/:id", async (req, res) => {
             // For interests, parse the compound value
             if (entity.entity_type === 'interest') {
                 const parsed = parseInterestValue(entity.entity_value, entity.canonical_name);
-                groupedEntities[entity.entity_type].push({
-                    name: parsed.name,
-                    confidence: entity.confidence,
-                    source_url: entity.source_url,
-                    intensity: parsed.intensity,
-                    category: parsed.category,
-                });
+                const entityKey = `${entity.entity_type}:${parsed.name}:${parsed.intensity || 'none'}`;
+
+                // Only add if we haven't seen this exact interest+intensity combo, or if this has higher confidence
+                if (!seenEntities[entityKey] || seenEntities[entityKey].confidence < entity.confidence) {
+                    seenEntities[entityKey] = {
+                        name: parsed.name,
+                        confidence: entity.confidence,
+                        source_url: entity.source_url,
+                        intensity: parsed.intensity,
+                        category: parsed.category,
+                    };
+                }
             } else {
                 // For other entity types, use canonical_name or entity_value
                 const displayName = entity.canonical_name || entity.entity_value;
-                groupedEntities[entity.entity_type].push({
-                    name: displayName,
-                    confidence: entity.confidence,
-                    source_url: entity.source_url,
-                });
+                const entityKey = `${entity.entity_type}:${displayName}`;
+
+                // Only add if we haven't seen this entity, or if this has higher confidence
+                if (!seenEntities[entityKey] || seenEntities[entityKey].confidence < entity.confidence) {
+                    seenEntities[entityKey] = {
+                        name: displayName,
+                        confidence: entity.confidence,
+                        source_url: entity.source_url,
+                    };
+                }
             }
         }
 
-        // Get all datapoints for this founder
+        // Now populate groupedEntities with deduplicated entities
+        for (const entityKey in seenEntities) {
+            const entityType = entityKey.split(':')[0];
+            if (!groupedEntities[entityType]) {
+                groupedEntities[entityType] = [];
+            }
+            groupedEntities[entityType].push(seenEntities[entityKey]);
+        }
+
+        // Sort each group by confidence (descending)
+        for (const entityType in groupedEntities) {
+            groupedEntities[entityType].sort((a, b) => b.confidence - a.confidence);
+        }
+
+        // Get all datapoints for this founder with confidence filter
         const datapoints = await dbInstance
             .selectFrom("person_datapoints")
             .select([
@@ -418,13 +524,63 @@ router.get("/:id", async (req, res) => {
             ])
             .where("person_id", "=", id)
             .where("status", "!=", "rejected")
+            .where("confidence", ">", 0.8)
             .orderBy("confidence", "desc")
             .execute();
 
-        // Extract profile pictures, social links, and LinkedIn bio
+        // Find the matching datapoint for profile pic/bio
+        const highestConfidenceLinkedin = allLinkedinDatapoints.find(
+            dp => dp.url === selectedLinkedinUrl
+        ) || allLinkedinDatapoints[0];
+
+        // Extract profile pictures, social links, LinkedIn bio, and full LinkedIn structured data
         let profilePictureUrl: string | null = null;
         let linkedinBio: string | null = null;
+        let linkedinStructuredData: any = null;
         const socialLinks: Record<string, string> = {};
+
+        // Use the selected LinkedIn URL
+        if (selectedLinkedinUrl) {
+            socialLinks["linkedin"] = selectedLinkedinUrl;
+
+            // Get profile picture, bio, and full structured data from the matching datapoint if available
+            if (highestConfidenceLinkedin?.structured_data) {
+                const structuredData = highestConfidenceLinkedin.structured_data as any;
+                const profile = structuredData.profile;
+
+                if (profile) {
+                    if (profile.profile_image_url) {
+                        profilePictureUrl = profile.profile_image_url;
+                    }
+                    if (profile.summary) {
+                        linkedinBio = profile.summary;
+                    }
+                    // Store full LinkedIn structured data
+                    linkedinStructuredData = {
+                        headline: profile.headline,
+                        current_position: profile.current_position,
+                        company: profile.company,
+                        location: profile.location,
+                        location_details: profile.location_details,
+                        connections_count: profile.connections_count,
+                        industry: profile.industry,
+                        follower_count: profile.follower_count,
+                        public_identifier: profile.public_identifier,
+                        is_premium: profile.is_premium,
+                        is_creator: profile.is_creator,
+                        is_influencer: profile.is_influencer,
+                        background_picture_url: profile.background_picture_url,
+                        about_section: profile.about_section || profile.summary,
+                        experience: profile.experience || [],
+                        education: profile.education || [],
+                        skills: profile.skills || [],
+                        endorsements_count: profile.endorsements_count,
+                        projects: profile.projects || [],
+                        recommendations: profile.recommendations,
+                    };
+                }
+            }
+        }
 
         for (const datapoint of datapoints) {
             if (datapoint.data_category === "profile" && datapoint.structured_data) {
@@ -434,27 +590,20 @@ router.get("/:id", async (req, res) => {
                 if (profile) {
                     const platform = datapoint.type;
 
-                    // Store social link
-                    if (datapoint.url) {
+                    // Store social link for non-LinkedIn platforms only
+                    if (datapoint.url && platform !== "linkedin") {
                         socialLinks[platform] = datapoint.url;
                     }
 
-                    // Get profile picture (prioritize LinkedIn)
-                    if (!profilePictureUrl || platform === "linkedin") {
-                        if (platform === "linkedin" && profile.profile_image_url) {
-                            profilePictureUrl = profile.profile_image_url;
-                        } else if (platform === "instagram" && profile.profile_picture_url) {
+                    // Get profile picture from other platforms if LinkedIn didn't provide one
+                    if (!profilePictureUrl) {
+                        if (platform === "instagram" && profile.profile_picture_url) {
                             profilePictureUrl = profile.profile_picture_url;
                         } else if (platform === "facebook" && profile.profile_picture_url) {
                             profilePictureUrl = profile.profile_picture_url;
                         } else if (platform === "twitter" && profile.profile_image_url) {
                             profilePictureUrl = profile.profile_image_url;
                         }
-                    }
-
-                    // Get LinkedIn bio/summary
-                    if (platform === "linkedin" && profile.summary) {
-                        linkedinBio = profile.summary;
                     }
                 }
             }
@@ -503,6 +652,7 @@ router.get("/:id", async (req, res) => {
                 bias_score: founder.bias_score,
                 profile_picture_url: profilePictureUrl,
                 linkedin_bio: linkedinBio,
+                linkedin_data: linkedinStructuredData,
                 social_links: socialLinks,
                 entities: groupedEntities,
                 datapoints: formattedDatapoints,

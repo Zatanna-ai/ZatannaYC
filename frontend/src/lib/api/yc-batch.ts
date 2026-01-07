@@ -11,12 +11,101 @@ import { API_BASE_URL, YC_CASE_SESSION_ID } from '../config'
 
 const API_KEY = process.env.NEXT_PUBLIC_API_KEY || ''
 
+export interface LinkedInData {
+  headline?: string
+  current_position?: string
+  company?: string
+  location?: string
+  location_details?: {
+    city?: string
+    country?: string
+    country_code?: string
+    full?: string
+  }
+  connections_count?: number
+  industry?: string
+  follower_count?: number
+  public_identifier?: string
+  is_premium?: boolean
+  is_creator?: boolean
+  is_influencer?: boolean
+  background_picture_url?: string
+  about_section?: string
+  experience?: Array<{
+    title: string
+    company: string
+    duration?: string
+    location?: string
+    description?: string
+    employment_type?: string
+    company_logo_url?: string
+    company_linkedin_url?: string
+    is_current?: boolean
+    start_date?: {
+      month?: string
+      year?: number
+    }
+    end_date?: {
+      month?: string
+      year?: number
+    }
+    skills?: string[]
+  }>
+  education?: Array<{
+    school: string
+    degree?: string
+    field?: string
+    years?: string
+    degree_name?: string
+    field_of_study?: string
+    duration?: string
+    school_logo_url?: string
+    school_linkedin_url?: string
+    description?: string
+    activities?: string
+    grade?: string
+    start_date?: {
+      month?: string
+      year?: number
+    }
+    end_date?: {
+      month?: string
+      year?: number
+    }
+  }>
+  skills?: string[]
+  endorsements_count?: number
+  projects?: Array<{
+    name: string
+    description?: string
+    start_date?: string
+    end_date?: string
+    associated_company?: string
+    project_urls?: string[]
+    skills?: string[]
+    contributors?: string[]
+  }>
+  recommendations?: {
+    received_recommendations?: Array<{
+      recommender_name?: string
+      relationship?: string
+      text?: string
+    }>
+    given_recommendations?: Array<{
+      recipient_name?: string
+      relationship?: string
+      text?: string
+    }>
+  }
+}
+
 export interface Founder {
   person_id: string
   name: string
   linkedin_url?: string
   profile_picture_url?: string
   linkedin_bio?: string
+  linkedin_data?: LinkedInData
   interests: Interest[]
   occupations: Occupation[]
   universities: string[]
@@ -63,6 +152,11 @@ export interface BatchStats {
   total_founders: number
   education: {
     university: string
+    count: number
+    percentage: number
+  }[]
+  education_levels: {
+    level: string
     count: number
     percentage: number
   }[]
@@ -258,6 +352,7 @@ function transformFounderData(apiFounder: any): Founder {
     linkedin_url: apiFounder.social_links?.linkedin || apiFounder.linkedin_url || null,
     profile_picture_url: apiFounder.profile_picture_url || null,
     linkedin_bio: apiFounder.linkedin_bio || null,
+    linkedin_data: apiFounder.linkedin_data || null,
     interests,
     occupations,
     universities,
@@ -344,6 +439,17 @@ export async function getBatchStats(): Promise<BatchStats> {
       percentage: Math.round((company.count / total) * 100 * 10) / 10
     }))
 
+    // Fetch education levels from separate endpoint
+    let educationLevels: { level: string; count: number; percentage: number }[] = []
+    try {
+      const educationLevelsResponse = await fetchAPI('/api/v1/yc-dashboard/education-levels')
+      if (educationLevelsResponse.success && educationLevelsResponse.data.education_levels) {
+        educationLevels = educationLevelsResponse.data.education_levels
+      }
+    } catch (error) {
+      console.warn('[YC Batch API] Failed to fetch education levels:', error)
+    }
+
     // For geography and occupations, we still need to fetch founders
     // or create additional backend endpoints for these specific analytics
     try {
@@ -354,6 +460,7 @@ export async function getBatchStats(): Promise<BatchStats> {
       return {
         total_founders: data.total_founders,
         education, // Use dashboard data for education
+        education_levels: educationLevels, // Use education levels from API
         interests, // Use dashboard data for interests
         companies, // Use dashboard data for companies
         geography: calculatedStats.geography,
@@ -361,8 +468,8 @@ export async function getBatchStats(): Promise<BatchStats> {
         other_stats: {
           ...calculatedStats.other_stats,
           // Use dashboard API value if available, otherwise use calculated value
-          avg_interests_per_founder: data.avg_interests_per_founder !== undefined 
-            ? data.avg_interests_per_founder 
+          avg_interests_per_founder: data.avg_interests_per_founder !== undefined
+            ? data.avg_interests_per_founder
             : calculatedStats.other_stats.avg_interests_per_founder
         }
       }
@@ -371,14 +478,15 @@ export async function getBatchStats(): Promise<BatchStats> {
       return {
         total_founders: data.total_founders,
         education,
+        education_levels: educationLevels, // Use education levels from API
         interests, // Use dashboard data for interests
         companies, // Use dashboard data for companies
         geography: [],
         occupations: [],
         other_stats: {
           // Use dashboard API value if available
-          avg_interests_per_founder: data.avg_interests_per_founder !== undefined 
-            ? data.avg_interests_per_founder 
+          avg_interests_per_founder: data.avg_interests_per_founder !== undefined
+            ? data.avg_interests_per_founder
             : 0,
           most_common_combinations: [],
           platform_distribution: []

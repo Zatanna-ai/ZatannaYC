@@ -1,10 +1,11 @@
 import { getBatchStats } from '@/lib/api/yc-batch'
 import { StatCard } from '@/components/StatCard'
-import { BarChart, PieChart } from '@/components/charts'
 import { SearchSection } from '@/components/SearchSection'
 import { CompaniesModalClient } from '@/components/CompaniesModalClient'
 import { CompaniesChart } from '@/components/CompaniesChart'
+import { OccupationsChart } from '@/components/OccupationsChart'
 import { EducationChart } from '@/components/EducationChart'
+import { EducationLevelChart } from '@/components/EducationLevelChart'
 import { InterestsListWithModal } from '@/components/InterestsListWithModal'
 import Link from 'next/link'
 
@@ -54,13 +55,6 @@ export default async function HomePage() {
     )
   }
 
-  // Prepare chart data
-  const occupationChartData = stats.occupations.slice(0, 10).map(item => ({
-    name: item.title.length > 20 ? item.title.substring(0, 20) + '...' : item.title,
-    value: item.percentage,
-    percentage: item.percentage,
-    fullName: item.title,
-  }))
 
   return (
     <div className="min-h-screen hero-texture">
@@ -134,12 +128,30 @@ export default async function HomePage() {
 
             {/* Right: Charts Grid */}
             <div className="space-y-6">
+              {/* Line 1: Education charts */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Education Pie Chart */}
                 <StatCard title="Education Distribution">
                   <EducationChart education={stats.education} />
                 </StatCard>
 
+                {/* Education Levels */}
+                {stats.education_levels && stats.education_levels.length > 0 && (
+                  <StatCard title="Highest Level of Education">
+                    <EducationLevelChart educationLevels={stats.education_levels} />
+                  </StatCard>
+                )}
+              </div>
+
+              {/* Line 2: Companies */}
+              <div className="grid grid-cols-1 gap-6">
+                <StatCard title="Top Companies">
+                  <CompaniesChart companies={stats.companies} />
+                </StatCard>
+              </div>
+
+              {/* Line 3: Interests and Occupations */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Top Interests - Clickable List */}
                 <StatCard title="Top Interests">
                   <InterestsListWithModal interests={stats.interests} />
@@ -147,19 +159,7 @@ export default async function HomePage() {
 
                 {/* Occupation Distribution with clickable list below */}
                 <StatCard title="Top Occupations & Roles">
-                  <div className="h-96">
-                    <BarChart
-                      data={occupationChartData}
-                      dataKey="value"
-                      color="hsl(var(--moss-green-400))"
-                      height={384}
-                    />
-                  </div>
-                </StatCard>
-
-                {/* Top Companies Distribution */}
-                <StatCard title="Top Companies">
-                  <CompaniesChart companies={stats.companies} />
+                  <OccupationsChart occupations={stats.occupations} />
                 </StatCard>
               </div>
             </div>

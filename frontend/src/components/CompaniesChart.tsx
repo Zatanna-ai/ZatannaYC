@@ -19,7 +19,7 @@ export function CompaniesChart({ companies }: CompaniesChartProps) {
   const [isModalOpen, setIsModalOpen] = useState(false)
 
   const companiesChartData = companies.slice(0, 10).map(item => ({
-    name: item.name.length > 20 ? item.name.substring(0, 20) + '...' : item.name,
+    name: item.name, // Show full name
     value: item.percentage,
     percentage: item.percentage,
     fullName: item.name,
@@ -53,7 +53,7 @@ export function CompaniesChart({ companies }: CompaniesChartProps) {
               setIsModalOpen(true)
             }}
           >
-            <span className="text-muted-foreground truncate mr-2">{item.name}</span>
+            <span className="text-muted-foreground mr-2">{item.name}</span>
             <span className="font-semibold text-info whitespace-nowrap">{item.percentage}%</span>
           </div>
         ))}

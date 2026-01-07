@@ -1036,4 +1036,287 @@ router.get("/occupations/:occupationTitle/founders", async (req, res) => {
     }
 });
 
+/**
+ * GET /api/v1/yc-dashboard/education-levels
+ *
+ * Returns education level distribution from LinkedIn data:
+ * - Bachelor's, Master's, MBA, PhD, MD, JD
+ * - Counts unique founders with each degree type
+ */
+router.get("/education-levels", async (req, res) => {
+    routeLogger.info({ query: req.query }, "YC Dashboard education levels request");
+    try {
+        const { organization_id, case_session_id } = req.query;
+        const orgId = (organization_id as string) || YC_ORGANIZATION_ID;
+        const caseSessionId = case_session_id as string;
+
+        routeLogger.debug({ organization_id: orgId, case_session_id: caseSessionId }, "Fetching education levels");
+
+        const dbInstance = await db;
+
+        // Get total founders count for percentage calculation
+        const foundersCount = await dbInstance
+            .selectFrom("person")
+            .select((eb) => eb.fn.countAll<number>().as("count"))
+            .where("organization_id", "=", orgId)
+            .executeTakeFirst();
+
+        const totalFounders = Number(foundersCount?.count || 0);
+
+        // Get all LinkedIn profile datapoints
+        const linkedinProfiles = await dbInstance
+            .selectFrom("person_datapoints")
+            .innerJoin("person", "person.id", "person_datapoints.person_id")
+            .select(["person.id as person_id", "person_datapoints.structured_data"])
+            .where("person.organization_id", "=", orgId)
+            .where("person_datapoints.type", "=", "linkedin")
+            .where("person_datapoints.data_category", "=", "profile")
+            .where("person_datapoints.status", "!=", "rejected")
+            .execute();
+
+        // Categorize founders by highest education level
+        const educationLevelCounts: Record<string, Set<string>> = {
+            "PhD / Doctorate": new Set(),
+            "MBA": new Set(),
+            "Master's Degree": new Set(),
+            "Bachelor's Degree": new Set(),
+        };
+
+        for (const profile of linkedinProfiles) {
+            if (!profile.structured_data) continue;
+
+            const sd = profile.structured_data as any;
+            const education = sd.profile?.education || [];
+
+            let highestLevel: string | null = null;
+
+            // Check each education entry and track the highest level
+            for (const edu of education) {
+                const degree = (edu.degree_name || edu.degree || "").toLowerCase();
+
+                if (degree.includes("phd") || degree.includes("ph.d") || degree.includes("doctor")) {
+                    highestLevel = "PhD / Doctorate";
+                    break; // PhD is highest, stop searching
+                } else if (degree.includes("mba") || degree.includes("m.b.a")) {
+                    if (!highestLevel || highestLevel === "Master's Degree" || highestLevel === "Bachelor's Degree") {
+                        highestLevel = "MBA";
+                    }
+                } else if (degree.includes("master") || degree.includes("ms") || degree.includes("ma ") || degree.includes("m.s") || degree.includes("m.a")) {
+                    if (!highestLevel || highestLevel === "Bachelor's Degree") {
+                        highestLevel = "Master's Degree";
+                    }
+                } else if (degree.includes("bachelor") || degree.includes("bs") || degree.includes("ba ") || degree.includes("b.s") || degree.includes("b.a") || degree.includes("undergraduate")) {
+                    if (!highestLevel) {
+                        highestLevel = "Bachelor's Degree";
+                    }
+                }
+            }
+
+            // Add founder to their highest education level category
+            if (highestLevel && profile.person_id) {
+                educationLevelCounts[highestLevel].add(profile.person_id);
+            }
+        }
+
+        // Convert to array format with counts and percentages
+        const educationLevels = Object.entries(educationLevelCounts)
+            .map(([level, people]) => ({
+                level,
+                count: people.size,
+                percentage: totalFounders > 0
+                    ? Math.round((people.size / totalFounders) * 100 * 10) / 10
+                    : 0,
+            }))
+            .filter(item => item.count > 0) // Only include levels with at least one founder
+            .sort((a, b) => b.count - a.count); // Sort by count descending
+
+        routeLogger.debug({
+            total_founders: totalFounders,
+            education_levels_count: educationLevels.length,
+        }, "Education levels calculated");
+
+        return res.json({
+            success: true,
+            data: {
+                education_levels: educationLevels,
+                total_founders: totalFounders,
+            },
+        });
+    } catch (error) {
+        routeLogger.error({ error }, "Failed to fetch education levels");
+        res.status(500).json({
+            success: false,
+            error: error instanceof Error ? error.message : "Failed to fetch education levels",
+        });
+    }
+});
+
+/**
+ * GET /api/v1/yc-dashboard/education-levels/:levelName/founders
+ * Get all founders with a specific education level
+ */
+router.get("/education-levels/:levelName/founders", async (req, res) => {
+    routeLogger.info({ params: req.params, query: req.query }, "YC Dashboard education level founders request");
+    try {
+        const { levelName } = req.params;
+        const { organization_id, case_session_id } = req.query;
+        const orgId = (organization_id as string) || YC_ORGANIZATION_ID;
+        const caseSessionId = case_session_id as string;
+
+        const decodedLevelName = decodeURIComponent(levelName);
+        routeLogger.debug({ level_name: decodedLevelName }, "Fetching founders for education level");
+
+        const dbInstance = await db;
+
+        // Get all LinkedIn profile datapoints
+        const linkedinProfiles = await dbInstance
+            .selectFrom("person_datapoints")
+            .innerJoin("person", "person.id", "person_datapoints.person_id")
+            .select(["person.id as person_id", "person_datapoints.structured_data"])
+            .where("person.organization_id", "=", orgId)
+            .where("person_datapoints.type", "=", "linkedin")
+            .where("person_datapoints.data_category", "=", "profile")
+            .where("person_datapoints.status", "!=", "rejected")
+            .execute();
+
+        // Find founders with the requested education level
+        const matchingPersonIds = new Set<string>();
+
+        for (const profile of linkedinProfiles) {
+            if (!profile.structured_data || !profile.person_id) continue;
+
+            const sd = profile.structured_data as any;
+            const education = sd.profile?.education || [];
+
+            let highestLevel: string | null = null;
+
+            // Check each education entry and track the highest level
+            for (const edu of education) {
+                const degree = (edu.degree_name || edu.degree || "").toLowerCase();
+
+                if (degree.includes("phd") || degree.includes("ph.d") || degree.includes("doctor")) {
+                    highestLevel = "PhD / Doctorate";
+                    break;
+                } else if (degree.includes("mba") || degree.includes("m.b.a")) {
+                    if (!highestLevel || highestLevel === "Master's Degree" || highestLevel === "Bachelor's Degree") {
+                        highestLevel = "MBA";
+                    }
+                } else if (degree.includes("master") || degree.includes("ms") || degree.includes("ma ") || degree.includes("m.s") || degree.includes("m.a")) {
+                    if (!highestLevel || highestLevel === "Bachelor's Degree") {
+                        highestLevel = "Master's Degree";
+                    }
+                } else if (degree.includes("bachelor") || degree.includes("bs") || degree.includes("ba ") || degree.includes("b.s") || degree.includes("b.a") || degree.includes("undergraduate")) {
+                    if (!highestLevel) {
+                        highestLevel = "Bachelor's Degree";
+                    }
+                }
+            }
+
+            if (highestLevel === decodedLevelName) {
+                matchingPersonIds.add(profile.person_id);
+            }
+        }
+
+        if (matchingPersonIds.size === 0) {
+            return res.json({
+                success: true,
+                data: {
+                    founders: [],
+                    level_name: decodedLevelName,
+                },
+            });
+        }
+
+        // Get founder details for matching person IDs
+        const founders = await dbInstance
+            .selectFrom("person")
+            .select([
+                "person.id",
+                "person.first_name",
+                "person.last_name",
+                "person.middle_name",
+                "person.occupation",
+                "person.employer",
+            ])
+            .where("person.organization_id", "=", orgId)
+            .where("person.id", "in", Array.from(matchingPersonIds))
+            .execute();
+
+        // Get profile pictures and LinkedIn URLs
+        const foundersWithDetails = await Promise.all(
+            founders.map(async (founder) => {
+                const linkedinDatapoint = await dbInstance
+                    .selectFrom("person_datapoints")
+                    .select(["structured_data"])
+                    .where("person_id", "=", founder.id)
+                    .where("type", "=", "linkedin")
+                    .where("data_category", "=", "profile")
+                    .where("status", "!=", "rejected")
+                    .orderBy("confidence", "desc")
+                    .limit(1)
+                    .executeTakeFirst();
+
+                let profilePictureUrl: string | null = null;
+                let linkedinUrl: string | null = null;
+
+                if (linkedinDatapoint?.structured_data) {
+                    const structuredData = linkedinDatapoint.structured_data as any;
+                    profilePictureUrl = structuredData.profile?.profile_image_url || null;
+                    linkedinUrl = structuredData.profile?.profile_url || null;
+                }
+
+                if (!profilePictureUrl) {
+                    const otherDatapoint = await dbInstance
+                        .selectFrom("person_datapoints")
+                        .select(["structured_data", "type"])
+                        .where("person_id", "=", founder.id)
+                        .where("data_category", "=", "profile")
+                        .where("status", "!=", "rejected")
+                        .where("type", "in", ["instagram", "facebook", "twitter"])
+                        .orderBy("confidence", "desc")
+                        .limit(1)
+                        .executeTakeFirst();
+
+                    if (otherDatapoint?.structured_data) {
+                        const structuredData = otherDatapoint.structured_data as any;
+                        profilePictureUrl = structuredData.profile?.profile_picture_url ||
+                                          structuredData.profile?.profile_image_url ||
+                                          null;
+                    }
+                }
+
+                return {
+                    id: founder.id,
+                    name: `${founder.first_name} ${founder.middle_name || ""} ${founder.last_name}`.trim(),
+                    first_name: founder.first_name,
+                    last_name: founder.last_name,
+                    profile_picture_url: profilePictureUrl,
+                    linkedin_url: linkedinUrl,
+                    current_role: founder.occupation || "Founder",
+                    current_company: founder.employer,
+                };
+            })
+        );
+
+        routeLogger.debug({
+            level_name: decodedLevelName,
+            founder_count: foundersWithDetails.length
+        }, "Found founders for education level");
+
+        return res.json({
+            success: true,
+            data: {
+                founders: foundersWithDetails,
+                level_name: decodedLevelName,
+            },
+        });
+    } catch (error) {
+        routeLogger.error({ error }, "Failed to fetch founders for education level");
+        res.status(500).json({
+            success: false,
+            error: error instanceof Error ? error.message : "Failed to fetch founders for education level",
+        });
+    }
+});
+
 export default router;
