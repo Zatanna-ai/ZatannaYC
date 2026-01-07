@@ -728,6 +728,7 @@ function calculateStatsFromFounders(founders: Founder[]): BatchStats {
   return {
     total_founders: total,
     education,
+    education_levels: [], // Would need LinkedIn education data to calculate
     interests,
     companies,
     geography,
