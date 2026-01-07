@@ -1,0 +1,1 @@
+self.__NEXT_FONT_MANIFEST="{\"pages\":{},\"app\":{\"/Users/rithvikvanga/Desktop/Zatanna/monorepo_parent/ZatannaYC/frontend/src/app/layout\":[\"static/media/3296bccdacdd55f7-s.p.woff2\"]},\"appUsingSizeAdjust\":true,\"pagesUsingSizeAdjust\":false}"

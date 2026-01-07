@@ -11,53 +11,56 @@ interface PieChartProps {
 }
 
 const DEFAULT_COLORS = [
-  'hsl(var(--moss-green))',
-  'hsl(var(--moss-green-400))',
-  'hsl(var(--moss-green-300))',
-  'hsl(var(--moss-green-200))',
-  'hsl(var(--gray-cream-400))',
-  'hsl(var(--info))',
-  'hsl(var(--success))',
-  'hsl(var(--warning))',
+  '#6B8E23',                      // Olive/Dark green
+  '#4A90E2',                      // Bright blue
+  '#F5A623',                      // Orange
+  '#50C878',                      // Emerald green
+  '#9B59B6',                      // Purple
+  '#E74C3C',                      // Red
+  '#95A5A6',                      // Gray
+  '#16A085',                      // Teal
 ]
 
-// Custom label renderer that only shows percentage on the slice
-const renderLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }: any) => {
-  // Only show label if slice is large enough (> 5%)
-  if (percent < 0.05) return null
+// Custom label renderer that shows percentage on all slices
+const renderLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, payload }: any) => {
+  // Use pre-calculated percentage if available, otherwise use Recharts calculated percent
+  const displayPercent = payload.percentage !== undefined ? payload.percentage / 100 : percent
 
   const RADIAN = Math.PI / 180
   const radius = innerRadius + (outerRadius - innerRadius) * 0.5
   const x = cx + radius * Math.cos(-midAngle * RADIAN)
   const y = cy + radius * Math.sin(-midAngle * RADIAN)
 
+  // Adjust font size based on percentage - smaller text for smaller slices
+  const fontSize = displayPercent < 0.05 ? 10 : displayPercent < 0.10 ? 12 : 14
+
   return (
     <text
       x={x}
       y={y}
       fill="white"
-      textAnchor={x > cx ? 'start' : 'end'}
+      textAnchor="middle"
       dominantBaseline="central"
-      fontSize={14}
+      fontSize={fontSize}
       fontWeight={600}
     >
-      {`${(percent * 100).toFixed(0)}%`}
+      {`${(displayPercent * 100).toFixed(0)}%`}
     </text>
   )
 }
 
-// Custom legend with better formatting
+// Custom legend with better formatting - single column to show full names
 const renderLegend = (props: any) => {
   const { payload } = props
   return (
-    <div className="grid grid-cols-2 gap-x-4 gap-y-2 mt-2 px-4">
+    <div className="flex flex-col gap-2 mt-4 px-4">
       {payload.map((entry: any, index: number) => (
-        <div key={`legend-${index}`} className="flex items-center gap-2">
+        <div key={`legend-${index}`} className="flex items-start gap-2">
           <div
-            className="w-3 h-3 rounded-sm flex-shrink-0"
+            className="w-3 h-3 rounded-sm flex-shrink-0 mt-0.5"
             style={{ backgroundColor: entry.color }}
           />
-          <span className="text-xs text-muted-foreground truncate leading-tight">
+          <span className="text-xs text-muted-foreground leading-tight break-words">
             {entry.value}
           </span>
         </div>
@@ -115,10 +118,10 @@ export function PieChart({ data, height = 300, colors = DEFAULT_COLORS, onSliceC
         <Pie
           data={data}
           cx="50%"
-          cy="48%"
+          cy="35%"
           labelLine={false}
           label={renderLabel}
-          outerRadius={110}
+          outerRadius={100}
           innerRadius={0}
           fill="hsl(var(--moss-green))"
           dataKey="value"

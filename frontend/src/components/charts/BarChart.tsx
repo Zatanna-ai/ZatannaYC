@@ -11,12 +11,8 @@ interface BarChartProps {
   showClickHint?: boolean
 }
 
-// Custom label for X-axis with smart truncation
+// Custom label for X-axis - show full names with rotation
 const CustomXAxisTick = ({ x, y, payload }: any) => {
-  const maxLength = 12
-  const text = payload.value
-  const truncated = text.length > maxLength ? text.substring(0, maxLength) + '...' : text
-
   return (
     <g transform={`translate(${x},${y})`}>
       <text
@@ -26,9 +22,9 @@ const CustomXAxisTick = ({ x, y, payload }: any) => {
         textAnchor="end"
         fill="hsl(var(--muted-foreground))"
         transform="rotate(-45)"
-        fontSize={10}
+        fontSize={9}
       >
-        {truncated}
+        {payload.value}
       </text>
     </g>
   )
@@ -76,7 +72,7 @@ export function BarChart({ data, dataKey = 'value', color = 'hsl(var(--moss-gree
     <ResponsiveContainer width="100%" height={height}>
       <RechartsBarChart
         data={data}
-        margin={{ top: 10, right: 20, left: 10, bottom: 90 }}
+        margin={{ top: 10, right: 20, left: 10, bottom: 120 }}
       >
         <CartesianGrid
           strokeDasharray="3 3"
@@ -87,7 +83,7 @@ export function BarChart({ data, dataKey = 'value', color = 'hsl(var(--moss-gree
           dataKey="name"
           stroke="hsl(var(--muted-foreground))"
           tick={<CustomXAxisTick />}
-          height={90}
+          height={120}
           interval={0}
         />
         <YAxis

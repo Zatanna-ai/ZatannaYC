@@ -20,7 +20,7 @@ export function EducationChart({ education }: EducationChartProps) {
 
   // Use count for pie chart sizing, but store percentage for tooltip
   const educationPieData = education.slice(0, 8).map(item => ({
-    name: item.university.length > 30 ? item.university.substring(0, 30) + '...' : item.university,
+    name: item.university, // Show full name in legend
     value: item.count, // Use count for pie chart sizing (Recharts will calculate percentages)
     percentage: item.percentage, // Store original percentage for tooltip display
     fullName: item.university,
@@ -34,10 +34,10 @@ export function EducationChart({ education }: EducationChartProps) {
 
   return (
     <>
-      <div className="h-96">
+      <div className="h-[500px]">
         <PieChart
           data={educationPieData}
-          height={384}
+          height={500}
           onSliceClick={handleSliceClick}
           showClickHint={true}
         />

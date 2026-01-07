@@ -266,6 +266,7 @@ export function generateMockStats(): BatchStats {
   return {
     total_founders: total,
     education,
+    education_levels: [], // Mock data doesn't have detailed education levels
     interests,
     companies: [],
     geography,
